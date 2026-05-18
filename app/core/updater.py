@@ -185,7 +185,7 @@ def apply_update(new_exe: Path) -> bool:
         bat.write_text(script, encoding="mbcs")
         subprocess.Popen(
             ["cmd.exe", "/V:ON", "/C", str(bat)],
-            creationflags=subprocess.CREATE_NO_WINDOW,
+            creationflags=subprocess.CREATE_NO_WINDOW,  # type: ignore[attr-defined]
         )
         logger.info(f"Update script launched for {exe.name}; exiting for handoff")
         return True
