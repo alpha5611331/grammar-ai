@@ -61,7 +61,6 @@ HOTKEY: str = "+".join(HOTKEYS)
 
 # Auto-updater
 RELEASES_API = "https://api.github.com/repos/vectorleap-pulse/grammar-ai/releases/latest"
-EXE_OLD_SUFFIX = "-old"
 UPDATE_CHECK_INTERVAL_MS = 5 * 60 * 1000
 
 # Windows autorun

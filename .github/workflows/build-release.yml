@@ -19,12 +19,12 @@ permissions:
 jobs:
   build-and-release:
     runs-on: windows-latest
-    
+
     steps:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    
+
     - name: Install uv
       uses: astral-sh/setup-uv@v6
       with:
@@ -37,29 +37,49 @@ jobs:
       id: bump_version
       run: uv run python .github/scripts/bump_version.py "${{ github.event.inputs.version_bump }}"
 
-    - name: Commit version bump
+    # Cache Nuitka's downloaded C toolchain and compiled headers.
+    # Key on pyproject.toml (which pins the nuitka version) — not on source files,
+    # because the cache contains toolchain downloads, not compiled objects.
+    - name: Cache Nuitka downloads
+      uses: actions/cache@v4
+      with:
+        path: ~\AppData\Local\Nuitka\Nuitka
+        key: nuitka-${{ runner.os }}-py3.12-${{ hashFiles('pyproject.toml') }}
+        restore-keys: |
+          nuitka-${{ runner.os }}-py3.12-
+
+    - name: Build standalone executable (Nuitka)
+      run: uv run python build.py
+
+    - name: Build installer (Inno Setup)
+      shell: pwsh
+      run: |
+        $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+        & $iscc /DAppVersion="${{ steps.bump_version.outputs.new_version }}" installer.iss
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+    # Commit and tag only after both build steps succeed.
+    # This keeps the repo clean: a failed build leaves no orphaned version bump.
+    - name: Commit and tag version bump
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add pyproject.toml
         git commit -m "Bump version to ${{ steps.bump_version.outputs.new_version }}"
         git tag "v${{ steps.bump_version.outputs.new_version }}"
-        git push
-        git push --tags
-    
-    - name: Build executable
-      run: uv run python build.py
-    
+        git push origin HEAD:${{ github.ref_name }}
+        git push origin "v${{ steps.bump_version.outputs.new_version }}"
+
     - name: Generate release notes
       id: release_notes
       run: uv run python .github/scripts/generate_release_notes.py --new-version "${{ steps.bump_version.outputs.new_version }}"
 
     - name: Create Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         tag_name: v${{ steps.bump_version.outputs.new_version }}
         name: Release v${{ steps.bump_version.outputs.new_version }}
         body: ${{ steps.release_notes.outputs.notes }}
-        files: ./dist/*.exe
+        files: ./dist/grammar-ai-installer-windows-x64-v${{ steps.bump_version.outputs.new_version }}.exe
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

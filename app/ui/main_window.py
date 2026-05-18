@@ -73,7 +73,6 @@ class MainWindow(tk.Tk):
         self._build()
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         self.after(10, self._remove_maximize_button)
-        updater.cleanup_old_files()
         self.after(5000, self._start_update_check)
         if self._autorun:
             self.after(100, self._start_tray)

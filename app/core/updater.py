@@ -13,7 +13,16 @@ from typing import Callable, Optional
 
 from loguru import logger
 
-from app.config import EXE_OLD_SUFFIX, RELEASES_API
+from app.config import RELEASES_API
+
+# True in Nuitka-compiled modules; False in plain Python (where __compiled__ is absent).
+# Evaluated once at import time — the conventional Nuitka frozen-detection idiom.
+_NUITKA_COMPILED: bool = "__compiled__" in globals()
+
+
+def _is_frozen() -> bool:
+    """True when running as a PyInstaller or Nuitka compiled binary."""
+    return getattr(sys, "frozen", False) or _NUITKA_COMPILED
 
 
 def _get_platform_tag() -> str:
@@ -27,30 +36,10 @@ def _get_platform_tag() -> str:
 
 
 def get_current_exe() -> Optional[Path]:
-    """Returns the running .exe path; None when running as a plain Python script."""
-    if not getattr(sys, "frozen", False):
-        logger.debug("Not running as frozen executable; skipping exe name check")
+    """Returns the installed exe path; None when running as a plain Python script."""
+    if not _is_frozen():
         return None
-    exe = Path(sys.executable)
-    if exe.exists():
-        return exe
-    renamed = exe.parent / "grammar-ai.exe"
-    if renamed.exists():
-        return renamed
-    return exe
-
-
-def cleanup_old_files() -> None:
-    """Delete any *-old.exe left over from a previous update mechanism."""
-    exe = get_current_exe()
-    if exe is None:
-        logger.debug("Not running as frozen executable; skipping old file cleanup")
-        return
-    for f in exe.parent.glob(f"*{EXE_OLD_SUFFIX}{exe.suffix}"):
-        try:
-            f.unlink()
-        except OSError as e:
-            logger.debug(f"Could not delete old exe {f.name}: {e}")
+    return Path(sys.executable)
 
 
 def _parse_version(v: str) -> tuple[int, ...]:
@@ -62,8 +51,8 @@ def _parse_version(v: str) -> tuple[int, ...]:
 
 def check_for_update(current_version: str) -> Optional[tuple[str, str]]:
     """
-    Returns (new_version, download_url) if a newer release with a matching
-    platform asset exists, otherwise None.
+    Returns (new_version, download_url) if a newer installer release exists
+    for the current platform, otherwise None.
     """
     try:
         req = urllib.request.Request(
@@ -76,6 +65,9 @@ def check_for_update(current_version: str) -> Optional[tuple[str, str]]:
         with urllib.request.urlopen(req, timeout=10) as resp:
             data = json.loads(resp.read().decode())
 
+        if data.get("draft") or data.get("prerelease"):
+            return None
+
         latest = data.get("tag_name", "").lstrip("v")
         if not latest or _parse_version(latest) <= _parse_version(current_version):
             return None
@@ -83,7 +75,7 @@ def check_for_update(current_version: str) -> Optional[tuple[str, str]]:
         platform_tag = _get_platform_tag()
         for asset in data.get("assets", []):
             name: str = asset.get("name", "")
-            if platform_tag in name:
+            if platform_tag in name and "installer" in name:
                 return latest, asset["browser_download_url"]
     except Exception as e:
         logger.warning(f"Update check failed: {e}")
@@ -95,11 +87,11 @@ def download_update(
     on_progress: Optional[Callable[[int], None]] = None,
 ) -> Optional[Path]:
     """
-    Download the update asset to the system temp directory.
+    Download the installer to the system temp directory.
     on_progress is called with an integer 0-100.
     Returns the destination path on success, None on failure.
     """
-    if get_current_exe() is None:
+    if not _is_frozen():
         return None
 
     # Strip query-string params from the URL before extracting the filename.
@@ -132,16 +124,15 @@ def download_update(
         return None
 
 
-def apply_update(new_exe: Path) -> bool:
+def apply_update(new_installer: Path) -> bool:
     """
-    Hand the update off to a temporary batch script that runs after this process
-    exits: it waits for the PID to disappear, copies the new exe into place, then
-    relaunches it.  The app never self-renames or directly executes a downloaded
-    binary, which eliminates the AV heuristics that trigger false positives.
+    Hand the downloaded Inno Setup installer off to a temporary batch script
+    that runs after this process exits: it waits for the PID to disappear,
+    then runs the installer silently (/VERYSILENT).  The installer replaces
+    all files and restarts the app via its [Run] section.
     Returns True on success; the caller must exit the process afterwards.
     """
-    exe = get_current_exe()
-    if exe is None:
+    if not _is_frozen():
         logger.debug("Not running as frozen executable; skipping update application")
         return False
 
@@ -150,6 +141,7 @@ def apply_update(new_exe: Path) -> bool:
     bat = Path(tempfile.gettempdir()) / f"grammar_ai_update_{pid}.bat"
     script = (
         "@echo off\n"
+        "setlocal enabledelayedexpansion\n"
         "set MAX_WAIT=60\n"
         "set /a WAITED=0\n"
         ":wait\n"
@@ -161,24 +153,11 @@ def apply_update(new_exe: Path) -> bool:
         "    if !WAITED! lss !MAX_WAIT! goto :wait\n"
         "    goto :cleanup\n"
         ")\n"
-        # Retry copy up to 5 times — AV scanners may lock the file briefly.
-        "set /a TRIES=0\n"
-        ":copy\n"
-        f'copy /Y "{new_exe}" "{exe}" >NUL\n'
-        "if not errorlevel 1 goto :launch\n"
-        "set /a TRIES+=1\n"
-        "if !TRIES! lss 5 (\n"
-        "    timeout /t 2 /nobreak >NUL\n"
-        "    goto :copy\n"
-        ")\n"
-        "goto :cleanup\n"
-        ":launch\n"
-        # Clear _MEIPASS so the new exe extracts its own temp dir instead of
-        # reusing the old process's (already-deleted) extraction path.
-        "set _MEIPASS=\n"
-        f'start "" "{exe}"\n'
+        # Run the Inno Setup installer silently; it handles file replacement and
+        # restarts the app via its [Run] section (Check: WizardSilent entry).
+        f'"{new_installer}" /VERYSILENT /NORESTART\n'
         ":cleanup\n"
-        f'del /F /Q "{new_exe}" 2>NUL\n'
+        f'del /F /Q "{new_installer}" 2>NUL\n'
         # (goto) closes cmd's handle to the script before del runs — reliable self-delete.
         '(goto) 2>NUL & del "%~f0"\n'
     )
@@ -190,10 +169,10 @@ def apply_update(new_exe: Path) -> bool:
             ["cmd.exe", "/V:ON", "/C", str(bat)],
             creationflags=subprocess.CREATE_NO_WINDOW,  # type: ignore[attr-defined]
         )
-        logger.info(f"Update script launched for {exe.name}; exiting for handoff")
+        logger.info("Installer update script launched; exiting for handoff")
         return True
     except Exception as e:
-        logger.error(f"Failed to launch update script: {e}")
+        logger.error(f"Failed to launch installer script: {e}")
         try:
             bat.unlink(missing_ok=True)
         except OSError:
