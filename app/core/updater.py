@@ -15,6 +15,15 @@ from loguru import logger
 
 from app.config import EXE_OLD_SUFFIX, RELEASES_API
 
+# True in Nuitka-compiled modules; False in plain Python (where __compiled__ is absent).
+# Evaluated once at import time — the conventional Nuitka frozen-detection idiom.
+_NUITKA_COMPILED: bool = "__compiled__" in globals()
+
+
+def _is_frozen() -> bool:
+    """True when running as a PyInstaller or Nuitka compiled binary."""
+    return getattr(sys, "frozen", False) or _NUITKA_COMPILED
+
 
 def _get_platform_tag() -> str:
     machine = platform.machine().lower()
@@ -28,7 +37,7 @@ def _get_platform_tag() -> str:
 
 def get_current_exe() -> Optional[Path]:
     """Returns the running .exe path; None when running as a plain Python script."""
-    if not getattr(sys, "frozen", False):
+    if not _is_frozen():
         logger.debug("Not running as frozen executable; skipping exe name check")
         return None
     exe = Path(sys.executable)
@@ -63,7 +72,8 @@ def _parse_version(v: str) -> tuple[int, ...]:
 def check_for_update(current_version: str) -> Optional[tuple[str, str]]:
     """
     Returns (new_version, download_url) if a newer release with a matching
-    platform asset exists, otherwise None.
+    platform asset exists, otherwise None.  Prefers installer assets over
+    raw executables when both are available.
     """
     try:
         req = urllib.request.Request(
@@ -76,15 +86,25 @@ def check_for_update(current_version: str) -> Optional[tuple[str, str]]:
         with urllib.request.urlopen(req, timeout=10) as resp:
             data = json.loads(resp.read().decode())
 
+        if data.get("draft") or data.get("prerelease"):
+            return None
+
         latest = data.get("tag_name", "").lstrip("v")
         if not latest or _parse_version(latest) <= _parse_version(current_version):
             return None
 
         platform_tag = _get_platform_tag()
+        installer: Optional[tuple[str, str]] = None
+        fallback: Optional[tuple[str, str]] = None
         for asset in data.get("assets", []):
             name: str = asset.get("name", "")
-            if platform_tag in name:
-                return latest, asset["browser_download_url"]
+            if platform_tag not in name:
+                continue
+            if "installer" in name:
+                installer = (latest, asset["browser_download_url"])
+            elif fallback is None:
+                fallback = (latest, asset["browser_download_url"])
+        return installer or fallback
     except Exception as e:
         logger.warning(f"Update check failed: {e}")
     return None
@@ -132,12 +152,12 @@ def download_update(
         return None
 
 
-def apply_update(new_exe: Path) -> bool:
+def apply_update(new_installer: Path) -> bool:
     """
-    Hand the update off to a temporary batch script that runs after this process
-    exits: it waits for the PID to disappear, copies the new exe into place, then
-    relaunches it.  The app never self-renames or directly executes a downloaded
-    binary, which eliminates the AV heuristics that trigger false positives.
+    Hand the downloaded Inno Setup installer off to a temporary batch script
+    that runs after this process exits: it waits for the PID to disappear,
+    then runs the installer silently (/VERYSILENT).  The installer replaces
+    all files and restarts the app via its [Run] section.
     Returns True on success; the caller must exit the process afterwards.
     """
     exe = get_current_exe()
@@ -150,6 +170,7 @@ def apply_update(new_exe: Path) -> bool:
     bat = Path(tempfile.gettempdir()) / f"grammar_ai_update_{pid}.bat"
     script = (
         "@echo off\n"
+        "setlocal enabledelayedexpansion\n"
         "set MAX_WAIT=60\n"
         "set /a WAITED=0\n"
         ":wait\n"
@@ -161,24 +182,11 @@ def apply_update(new_exe: Path) -> bool:
         "    if !WAITED! lss !MAX_WAIT! goto :wait\n"
         "    goto :cleanup\n"
         ")\n"
-        # Retry copy up to 5 times — AV scanners may lock the file briefly.
-        "set /a TRIES=0\n"
-        ":copy\n"
-        f'copy /Y "{new_exe}" "{exe}" >NUL\n'
-        "if not errorlevel 1 goto :launch\n"
-        "set /a TRIES+=1\n"
-        "if !TRIES! lss 5 (\n"
-        "    timeout /t 2 /nobreak >NUL\n"
-        "    goto :copy\n"
-        ")\n"
-        "goto :cleanup\n"
-        ":launch\n"
-        # Clear _MEIPASS so the new exe extracts its own temp dir instead of
-        # reusing the old process's (already-deleted) extraction path.
-        "set _MEIPASS=\n"
-        f'start "" "{exe}"\n'
+        # Run the Inno Setup installer silently; it handles file replacement and
+        # restarts the app via its [Run] section (Check: WizardSilent entry).
+        f'"{new_installer}" /VERYSILENT /NORESTART\n'
         ":cleanup\n"
-        f'del /F /Q "{new_exe}" 2>NUL\n'
+        f'del /F /Q "{new_installer}" 2>NUL\n'
         # (goto) closes cmd's handle to the script before del runs — reliable self-delete.
         '(goto) 2>NUL & del "%~f0"\n'
     )
@@ -190,10 +198,10 @@ def apply_update(new_exe: Path) -> bool:
             ["cmd.exe", "/V:ON", "/C", str(bat)],
             creationflags=subprocess.CREATE_NO_WINDOW,  # type: ignore[attr-defined]
         )
-        logger.info(f"Update script launched for {exe.name}; exiting for handoff")
+        logger.info("Installer update script launched; exiting for handoff")
         return True
     except Exception as e:
-        logger.error(f"Failed to launch update script: {e}")
+        logger.error(f"Failed to launch installer script: {e}")
         try:
             bat.unlink(missing_ok=True)
         except OSError:
