@@ -48,17 +48,15 @@ jobs:
       with:
         nuitka-version: main
         script-name: main.py
-        standalone: true
-        output-filename: grammar-ai.exe
+        output-file: grammar-ai.exe
         output-dir: build
         enable-plugins: tk-inter
         windows-icon-from-ico: resources/icon.ico
-        windows-disable-console: true
+        windows-console-mode: disable
         include-data-files: |
           pyproject.toml=pyproject.toml
           resources/icon.png=resources/icon.png
         assume-yes-for-downloads: true
-        lto: no
 
     - name: Build installer (Inno Setup)
       shell: pwsh
