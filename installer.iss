@@ -15,6 +15,7 @@ DefaultGroupName={#AppName}
 AllowNoIcons=yes
 OutputDir=dist
 OutputBaseFilename=grammar-ai-installer-windows-x64-v{#AppVersion}
+SetupIconFile=resources\icon.ico
 Compression=lzma2
 SolidCompression=yes
 VersionInfoVersion={#AppVersion}

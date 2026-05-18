@@ -14,6 +14,18 @@ def get_project_version(pyproject_path: Path) -> str:
     return project["project"]["version"]
 
 
+def _make_ico(png_path: Path, ico_path: Path) -> None:
+    """Convert PNG to a multi-resolution ICO using Pillow."""
+    from PIL import Image
+
+    img = Image.open(png_path).convert("RGBA")
+    img.save(
+        ico_path,
+        format="ICO",
+        sizes=[(256, 256), (128, 128), (64, 64), (48, 48), (32, 32), (16, 16)],
+    )
+
+
 def build_exe(debug: bool = False) -> int:
     """Build Grammar AI as a Nuitka standalone distribution."""
     root = Path(__file__).parent
@@ -39,7 +51,9 @@ def build_exe(debug: bool = False) -> int:
     ]
 
     if sys.platform.startswith("win"):
-        nuitka_args.append(f"--windows-icon-from-ico={root / 'resources' / 'icon.png'}")
+        ico_path = root / "resources" / "icon.ico"
+        _make_ico(root / "resources" / "icon.png", ico_path)
+        nuitka_args.append(f"--windows-icon-from-ico={ico_path}")
         if not debug:
             nuitka_args.append("--windows-disable-console")
 
