@@ -173,6 +173,9 @@ def apply_update(new_exe: Path) -> bool:
         ")\n"
         "goto :cleanup\n"
         ":launch\n"
+        # Clear _MEIPASS so the new exe extracts its own temp dir instead of
+        # reusing the old process's (already-deleted) extraction path.
+        "set _MEIPASS=\n"
         f'start "" "{exe}"\n'
         ":cleanup\n"
         f'del /F /Q "{new_exe}" 2>NUL\n'
