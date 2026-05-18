@@ -5,9 +5,10 @@ from app.schemas.models import Goal, Tone
 
 APP_NAME = "Grammar AI"
 
-# Icon path — sys._MEIPASS when frozen, project root otherwise
-if getattr(sys, "frozen", False):
-    ICON_PATH = Path(getattr(sys, "_MEIPASS", ".")) / "resources" / "icon.png"
+_NUITKA_COMPILED: bool = "__compiled__" in globals()
+
+if getattr(sys, "frozen", False) or _NUITKA_COMPILED:
+    ICON_PATH = Path(sys.executable).parent / "resources" / "icon.png"
 else:
     ICON_PATH = Path(__file__).resolve().parent.parent / "resources" / "icon.png"
 

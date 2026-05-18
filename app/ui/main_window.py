@@ -9,6 +9,8 @@ from pathlib import Path
 from tkinter import messagebox, ttk
 from typing import Optional
 
+_NUITKA_COMPILED: bool = "__compiled__" in globals()
+
 import pystray
 from loguru import logger
 from PIL import Image, ImageTk
@@ -28,11 +30,8 @@ from app.ui.main_tab import MainTab
 
 
 def get_app_version() -> str:
-    if getattr(sys, "frozen", False):
-        # In a frozen exe, importlib.metadata reflects the dist-info from the
-        # build environment (installed before version bump), so read the
-        # bundled pyproject.toml which is always written after the bump.
-        project_root = Path(sys._MEIPASS)  # type: ignore[attr-defined]
+    if getattr(sys, "frozen", False) or _NUITKA_COMPILED:
+        project_root = Path(sys.executable).parent
         try:
             with open(project_root / "pyproject.toml", "rb") as f:
                 data = tomllib.load(f)
