@@ -13,7 +13,7 @@ from typing import Callable, Optional
 
 from loguru import logger
 
-from app.config import EXE_OLD_SUFFIX, RELEASES_API
+from app.config import RELEASES_API
 
 # True in Nuitka-compiled modules; False in plain Python (where __compiled__ is absent).
 # Evaluated once at import time — the conventional Nuitka frozen-detection idiom.
@@ -36,30 +36,10 @@ def _get_platform_tag() -> str:
 
 
 def get_current_exe() -> Optional[Path]:
-    """Returns the running .exe path; None when running as a plain Python script."""
+    """Returns the installed exe path; None when running as a plain Python script."""
     if not _is_frozen():
-        logger.debug("Not running as frozen executable; skipping exe name check")
         return None
-    exe = Path(sys.executable)
-    if exe.exists():
-        return exe
-    renamed = exe.parent / "grammar-ai.exe"
-    if renamed.exists():
-        return renamed
-    return exe
-
-
-def cleanup_old_files() -> None:
-    """Delete any *-old.exe left over from a previous update mechanism."""
-    exe = get_current_exe()
-    if exe is None:
-        logger.debug("Not running as frozen executable; skipping old file cleanup")
-        return
-    for f in exe.parent.glob(f"*{EXE_OLD_SUFFIX}{exe.suffix}"):
-        try:
-            f.unlink()
-        except OSError as e:
-            logger.debug(f"Could not delete old exe {f.name}: {e}")
+    return Path(sys.executable)
 
 
 def _parse_version(v: str) -> tuple[int, ...]:
@@ -71,9 +51,8 @@ def _parse_version(v: str) -> tuple[int, ...]:
 
 def check_for_update(current_version: str) -> Optional[tuple[str, str]]:
     """
-    Returns (new_version, download_url) if a newer release with a matching
-    platform asset exists, otherwise None.  Prefers installer assets over
-    raw executables when both are available.
+    Returns (new_version, download_url) if a newer installer release exists
+    for the current platform, otherwise None.
     """
     try:
         req = urllib.request.Request(
@@ -94,17 +73,10 @@ def check_for_update(current_version: str) -> Optional[tuple[str, str]]:
             return None
 
         platform_tag = _get_platform_tag()
-        installer: Optional[tuple[str, str]] = None
-        fallback: Optional[tuple[str, str]] = None
         for asset in data.get("assets", []):
             name: str = asset.get("name", "")
-            if platform_tag not in name:
-                continue
-            if "installer" in name:
-                installer = (latest, asset["browser_download_url"])
-            elif fallback is None:
-                fallback = (latest, asset["browser_download_url"])
-        return installer or fallback
+            if platform_tag in name and "installer" in name:
+                return latest, asset["browser_download_url"]
     except Exception as e:
         logger.warning(f"Update check failed: {e}")
     return None
@@ -115,11 +87,11 @@ def download_update(
     on_progress: Optional[Callable[[int], None]] = None,
 ) -> Optional[Path]:
     """
-    Download the update asset to the system temp directory.
+    Download the installer to the system temp directory.
     on_progress is called with an integer 0-100.
     Returns the destination path on success, None on failure.
     """
-    if get_current_exe() is None:
+    if not _is_frozen():
         return None
 
     # Strip query-string params from the URL before extracting the filename.
@@ -160,8 +132,7 @@ def apply_update(new_installer: Path) -> bool:
     all files and restarts the app via its [Run] section.
     Returns True on success; the caller must exit the process afterwards.
     """
-    exe = get_current_exe()
-    if exe is None:
+    if not _is_frozen():
         logger.debug("Not running as frozen executable; skipping update application")
         return False
 
