@@ -36,9 +36,12 @@ class HotkeyManager:
             return
         with self._lock:
             if not self._enabled:
-                _kb.add_hotkey(HOTKEY, self._dispatch, suppress=False)
-                self._enabled = True
-                logger.info(f"Hotkey {HOTKEY} enabled")
+                try:
+                    _kb.add_hotkey(HOTKEY, self._dispatch, suppress=False)
+                    self._enabled = True
+                    logger.info(f"Hotkey {HOTKEY} enabled")
+                except Exception as e:
+                    logger.warning(f"Could not register hotkey {HOTKEY}: {e}")
 
     def disable(self) -> None:
         if not _HAS_KB:
