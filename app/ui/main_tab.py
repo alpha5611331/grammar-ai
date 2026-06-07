@@ -260,7 +260,6 @@ class MainTab(ttk.Frame):
     def _run_llm(self, text: str) -> None:
         if str(self._trigger_btn.cget("state")) == "disabled":
             return
-            
         if not self._config.api_key:
             messagebox.showwarning(
                 "No API key",
