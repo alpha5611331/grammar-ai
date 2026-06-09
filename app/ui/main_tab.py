@@ -32,17 +32,22 @@ class _PolishedItem(ttk.Frame):
         goal: Goal,
         text: str,
         on_use: Callable[[Goal, str], None],
+        on_copy: Callable[[Goal, str], None],
     ) -> None:
         super().__init__(parent, relief="groove", borderwidth=1)
         self._goal = goal
         self._on_use = on_use
+        self._on_copy_callback = on_copy
         self._build(goal, text)
 
     def _build(self, goal: Goal, text: str) -> None:
         header = ttk.Frame(self)
         header.pack(fill="x", padx=4, pady=(4, 0))
         ttk.Label(header, text=goal.capitalize(), font=("", 8, "bold")).pack(side="left")
+
         ttk.Button(header, text="Use", width=5, command=self._use).pack(side="right")
+        self._copy_btn = ttk.Button(header, text="Copy", width=6, command=self._copy)
+        self._copy_btn.pack(side="right", padx=(0, 4))
 
         self._txt = tk.Text(
             self, wrap="word", font=("", 9), borderwidth=0, highlightthickness=0, relief="flat"
@@ -86,6 +91,11 @@ class _PolishedItem(ttk.Frame):
 
     def _use(self) -> None:
         self._on_use(self._goal, self.get_text())
+
+    def _copy(self) -> None:
+        self._on_copy_callback(self._goal, self.get_text())
+        self._copy_btn.config(text="Copied!")
+        self.after(1500, lambda: self._copy_btn.config(text="Copy"))
 
 
 class MainTab(ttk.Frame):
@@ -338,6 +348,7 @@ class MainTab(ttk.Frame):
             goal=result.goal,
             text=result.text,
             on_use=lambda goal, txt, orig=original: self._use_text(orig, goal, txt),  # type: ignore
+            on_copy=lambda goal, txt, orig=original: self._copy_text(orig, goal, txt),  # type: ignore
         )
 
         insert_index = 0
@@ -353,7 +364,13 @@ class MainTab(ttk.Frame):
             item.pack(fill="x", padx=2, pady=2)
             self._items.append(item)
 
-    # ------------------------------------------------------------------ Use
+    # ------------------------------------------------------------------ Actions
+
+    def _copy_text(self, original: str, goal: Goal, text: str) -> None:
+        pyperclip.copy(text)
+        tone = Tone(self._tone_var.get().lower())
+        save_history(original, text, tone, goal)
+        self._set_status(f"Copied to clipboard ({tone} / {goal})", "green")
 
     def _use_text(self, original: str, goal: Goal, text: str) -> None:
         tone = Tone(self._tone_var.get().lower())
