@@ -19,7 +19,7 @@ from app.db.database import (
     save_history,
     save_selected_tone,
 )
-from app.i18n import goal_name, t, tone_name
+from app.i18n import Msg, goal_name, t, tone_name
 from app.schemas.models import Goal, LLMConfig, PolishedText, Tone
 from app.ui.settings_dialog import SettingsDialog
 
@@ -46,8 +46,8 @@ class _PolishedItem(ttk.Frame):
         header.pack(fill="x", padx=4, pady=(4, 0))
         ttk.Label(header, text=goal_name(goal), font=("", 8, "bold")).pack(side="left")
 
-        ttk.Button(header, text=t("Use"), width=5, command=self._use).pack(side="right")
-        self._copy_btn = ttk.Button(header, text=t("Copy"), width=6, command=self._copy)
+        ttk.Button(header, text=t(Msg.USE), width=5, command=self._use).pack(side="right")
+        self._copy_btn = ttk.Button(header, text=t(Msg.COPY), width=6, command=self._copy)
         self._copy_btn.pack(side="right", padx=(0, 4))
 
         self._txt = tk.Text(
@@ -95,8 +95,8 @@ class _PolishedItem(ttk.Frame):
 
     def _copy(self) -> None:
         self._on_copy_callback(self._goal, self.get_text())
-        self._copy_btn.config(text=t("Copied!"))
-        self.after(1500, lambda: self._copy_btn.config(text=t("Copy")))
+        self._copy_btn.config(text=t(Msg.COPIED_EXCL))
+        self.after(1500, lambda: self._copy_btn.config(text=t(Msg.COPY)))
 
 
 class MainTab(ttk.Frame):
@@ -130,11 +130,11 @@ class MainTab(ttk.Frame):
     def _build_toolbar(self) -> None:
         bar = ttk.Frame(self, padding=(6, 4))
         bar.pack(fill="x")
-        ttk.Button(bar, text=t("Clear"), command=self._clear_all).pack(side="left", padx=2)
-        ttk.Button(bar, text=t("Settings"), command=self._open_settings).pack(side="right", padx=2)
+        ttk.Button(bar, text=t(Msg.CLEAR), command=self._clear_all).pack(side="left", padx=2)
+        ttk.Button(bar, text=t(Msg.SETTINGS), command=self._open_settings).pack(side="right", padx=2)
 
     def _build_original(self) -> None:
-        lf = ttk.LabelFrame(self, text=t("Original Text"), padding=4)
+        lf = ttk.LabelFrame(self, text=t(Msg.ORIGINAL_TEXT), padding=4)
         lf.pack(fill="x", padx=6, pady=(0, 4))
 
         self._orig = tk.Text(lf, height=4, wrap="word", font=("", 9))
@@ -146,7 +146,7 @@ class MainTab(ttk.Frame):
         bar = ttk.Frame(self, padding=(6, 4))
         bar.pack(fill="x")
 
-        ttk.Label(bar, text=t("Tone:")).pack(side="left")
+        ttk.Label(bar, text=t(Msg.TONE_LABEL)).pack(side="left")
         tone_combo = ttk.Combobox(
             bar,
             textvariable=self._tone_var,
@@ -160,7 +160,7 @@ class MainTab(ttk.Frame):
         hotkey = "+".join(h.capitalize() for h in HOTKEYS)
         self._trigger_btn = ttk.Button(
             bar,
-            text=t("Trigger ({hotkey})").format(hotkey=hotkey),
+            text=t(Msg.TRIGGER).format(hotkey=hotkey),
             command=self._trigger_manual,
         )
         self._trigger_btn.pack(side="left", padx=2)
@@ -173,7 +173,7 @@ class MainTab(ttk.Frame):
         self._status_lbl.pack(side="left")
 
     def _build_results(self) -> None:
-        lf = ttk.LabelFrame(self, text=t("Polished Versions"), padding=4)
+        lf = ttk.LabelFrame(self, text=t(Msg.POLISHED_VERSIONS), padding=4)
         lf.pack(fill="both", expand=True, padx=6, pady=(0, 6))
 
         canvas = tk.Canvas(lf, borderwidth=0, highlightthickness=0)
@@ -246,8 +246,8 @@ class MainTab(ttk.Frame):
         text = self._orig.get("1.0", "end-1c").strip()
         if not text:
             messagebox.showinfo(
-                t("Empty"),
-                t("Enter or paste text to polish."),
+                t(Msg.EMPTY),
+                t(Msg.ENTER_OR_PASTE),
                 parent=self.winfo_toplevel(),
             )
             return
@@ -279,15 +279,15 @@ class MainTab(ttk.Frame):
             return
         if not self._config.api_key:
             messagebox.showwarning(
-                t("No API key"),
-                t("Configure your API key in Settings first."),
+                t(Msg.NO_API_KEY),
+                t(Msg.CONFIGURE_API_KEY),
                 parent=self.winfo_toplevel(),
             )
             return
 
         self._clear_results()
         self._received = 0
-        self._set_status(t("Polishing…"), "blue")
+        self._set_status(t(Msg.POLISHING), "blue")
         self._trigger_btn.config(state="disabled")
         config = self._config
 
@@ -301,7 +301,7 @@ class MainTab(ttk.Frame):
         def worker() -> None:
             try:
                 polish_text(text, tone, config, goals=goals, on_result=on_result)
-                self.after(0, lambda: self._set_status(t("Polished versions ready"), "green"))
+                self.after(0, lambda: self._set_status(t(Msg.POLISHED_READY), "green"))
             except Exception as exc:
                 error_msg = str(exc)
                 logger.error(f"LLM error: {error_msg}")
@@ -312,16 +312,16 @@ class MainTab(ttk.Frame):
         threading.Thread(target=worker, daemon=True).start()
 
     def _show_llm_error(self, error_msg: str) -> None:
-        self._set_status(t("Error"), "red")
+        self._set_status(t(Msg.ERROR), "red")
         top = self.winfo_toplevel()
 
         dlg = tk.Toplevel(top)
-        dlg.title(t("LLM Error"))
+        dlg.title(t(Msg.LLM_ERROR))
         dlg.resizable(False, False)
         dlg.transient(top)
         dlg.grab_set()
 
-        ttk.Label(dlg, text=t("An error occurred while calling the LLM:"), font=("", 9)).pack(
+        ttk.Label(dlg, text=t(Msg.LLM_ERROR_BODY), font=("", 9)).pack(
             padx=16, pady=(14, 4), anchor="w"
         )
         txt = tk.Text(dlg, height=6, width=54, wrap="word", font=("", 9), state="normal")
@@ -338,13 +338,13 @@ class MainTab(ttk.Frame):
                 os.startfile(str(LOG_PATH))  # type: ignore[attr-defined]
             except Exception as e:
                 messagebox.showerror(
-                    t("Error"),
-                    t("Could not open log file:\n{error}").format(error=e),
+                    t(Msg.ERROR),
+                    t(Msg.COULD_NOT_OPEN_LOG).format(error=e),
                     parent=top,
                 )
 
-        ttk.Button(btn_row, text=t("Open Log"), command=open_log).pack(side="left", padx=6)
-        ttk.Button(btn_row, text=t("Close"), command=dlg.destroy).pack(side="left", padx=6)
+        ttk.Button(btn_row, text=t(Msg.OPEN_LOG), command=open_log).pack(side="left", padx=6)
+        ttk.Button(btn_row, text=t(Msg.CLOSE), command=dlg.destroy).pack(side="left", padx=6)
 
         dlg.update_idletasks()
         x = top.winfo_rootx() + (top.winfo_width() - dlg.winfo_width()) // 2
@@ -354,7 +354,7 @@ class MainTab(ttk.Frame):
     def _add_result(self, original: str, result: PolishedText) -> None:
         self._received += 1
         self._set_status(
-            t("Polishing… ({received}/{total})").format(
+            t(Msg.POLISHING_PROGRESS).format(
                 received=self._received, total=len(self._selected_goals)
             ),
             "blue",
@@ -387,7 +387,7 @@ class MainTab(ttk.Frame):
         tone = self._current_tone()
         save_history(original, text, tone, goal)
         self._set_status(
-            t("Copied to clipboard ({tone} / {goal})").format(
+            t(Msg.COPIED_TO_CLIPBOARD).format(
                 tone=tone_name(tone), goal=goal_name(goal)
             ),
             "green",
@@ -399,7 +399,7 @@ class MainTab(ttk.Frame):
         hwnd = self._hotkey.last_hwnd
         if hwnd and restore_focus_and_paste(hwnd, original, text):
             self._set_status(
-                t("Pasted ({tone} / {goal})").format(
+                t(Msg.PASTED).format(
                     tone=tone_name(tone), goal=goal_name(goal)
                 ),
                 "green",
@@ -407,7 +407,7 @@ class MainTab(ttk.Frame):
         else:
             pyperclip.copy(text)
             self._set_status(
-                t("Copied ({tone} / {goal})").format(
+                t(Msg.COPIED).format(
                     tone=tone_name(tone), goal=goal_name(goal)
                 ),
                 "gray",
