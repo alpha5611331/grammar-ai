@@ -41,6 +41,8 @@ def _build_system_prompt(language: str) -> str:
             f"translate it into {lang} first, then polish it.\n"
             f"- Correct all grammar, spelling, punctuation, and capitalization using natural, "
             f"idiomatic {lang}.\n"
+            f"- Use {lang}'s own conventions for quotation marks, punctuation, and number and "
+            f"date formatting. Keep numeric values themselves unchanged.\n"
             "- Sharpen word choice — cut filler and replace weak phrases with crisp, natural ones."
         )
 
@@ -83,21 +85,37 @@ Examples:
 Return only plain polished text. Every output must read like something a real person would actually say or write — fluent, confident, no fluff.
 """
 
-# Extra instructions injected into the user message for specific tones.
-_TONE_EXTRA: dict[Tone, str] = {
-    Tone.CHATTING: (
+# Extra instructions injected into the user message for the chatting tone.
+# The English contraction list is English-specific, so non-English output gets a
+# language-neutral version that defers to the target language's own chat slang.
+_CHATTING_EXTRA_EN = (
+    "\n\nADDITIONAL RULES for chatting tone (override general rules where they conflict):\n"
+    "Write exactly like a fast, casual text or chat message. Apply ALL of these:\n"
+    "- Contract aggressively: you're → u're, you → u, are → r, be → b, see → c, "
+    "okay/ok → k, because → cuz, going to → gonna, want to → wanna, got to → gotta, "
+    "kind of → kinda, sort of → sorta, something → smth, though → tho, through → thru, "
+    "with → w/, without → w/o, to be honest → tbh, by the way → btw, "
+    "as soon as possible → asap, in my opinion → imo, not going to lie → ngl.\n"
+    "- Lowercase is fine where it feels natural.\n"
+    "- Drop unnecessary end punctuation on short or casual lines.\n"
+    "- Keep it punchy: short phrases, skip formal transitions."
+)
+
+
+def _tone_extra(tone: Tone, language: str) -> str:
+    if tone is not Tone.CHATTING:
+        return ""
+    if _is_english(language):
+        return _CHATTING_EXTRA_EN
+    return (
         "\n\nADDITIONAL RULES for chatting tone (override general rules where they conflict):\n"
-        "Write exactly like a fast, casual text or chat message. Apply ALL of these:\n"
-        "- Contract aggressively: you're → u're, you → u, are → r, be → b, see → c, "
-        "okay/ok → k, because → cuz, going to → gonna, want to → wanna, got to → gotta, "
-        "kind of → kinda, sort of → sorta, something → smth, though → tho, through → thru, "
-        "with → w/, without → w/o, to be honest → tbh, by the way → btw, "
-        "as soon as possible → asap, in my opinion → imo, not going to lie → ngl.\n"
+        f"Write exactly like a fast, casual text or chat message in {language}. Apply ALL of these:\n"
+        f"- Use the everyday contractions, abbreviations, and slang that native {language} "
+        "speakers actually type in chats. Do NOT insert English abbreviations.\n"
         "- Lowercase is fine where it feels natural.\n"
         "- Drop unnecessary end punctuation on short or casual lines.\n"
         "- Keep it punchy: short phrases, skip formal transitions."
-    ),
-}
+    )
 
 # Reuse one client per (api_key, base_url) pair to avoid repeated connection pool creation.
 _clients: dict[tuple[str, str], OpenAI] = {}
@@ -110,10 +128,10 @@ def _get_client(config: LLMConfig) -> OpenAI:
     return _clients[key]
 
 
-def _format_batch_request(text: str, tone: Tone, goals: list[Goal]) -> str:
+def _format_batch_request(text: str, tone: Tone, goals: list[Goal], language: str) -> str:
     line_count = text.count("\n")
     goal_entries = "\n".join(f'  "{g}": "<polished text with {g} goal>"' for g in goals)
-    tone_extra = _TONE_EXTRA.get(tone, "")
+    tone_extra = _tone_extra(tone, language)
     return (
         f"Polish the text inside <input_text> tags in a {tone} tone, "
         f"for each of these goals: {', '.join(goals)}.\n\n"
@@ -161,7 +179,12 @@ def polish_text(
         max_tokens=8192,
         messages=[
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": _format_batch_request(text, tone, active_goals)},
+            {
+                "role": "user",
+                "content": _format_batch_request(
+                    text, tone, active_goals, config.output_language
+                ),
+            },
         ],
     )
     content = response.choices[0].message.content or "{}"
