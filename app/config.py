@@ -51,6 +51,18 @@ LANGUAGES: list[str] = [
     "Indonesian",
 ]
 
+# Interface localization — language of the app UI itself (distinct from output_language).
+# Maps the display label shown in Settings to the i18n language code.
+DEFAULT_UI_LANGUAGE = "en"
+UI_LANGUAGES: dict[str, str] = {
+    "English": "en",
+    "Spanish": "es",
+    "French": "fr",
+    "German": "de",
+    "Japanese": "ja",
+    "Korean": "ko",
+}
+
 # Text polishing
 TONES: list[Tone] = [
     Tone.PROFESSIONAL,

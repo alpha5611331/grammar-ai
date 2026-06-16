@@ -150,6 +150,23 @@ def save_selected_goals(goals: list[Goal]) -> None:
     logger.debug(f"Selected goals saved: {goals}")
 
 
+def load_ui_language() -> str:
+    from app.config import DEFAULT_UI_LANGUAGE
+
+    with _connect() as conn:
+        row = conn.execute("SELECT value FROM settings WHERE key = 'ui_language'").fetchone()
+    return row["value"] if row else DEFAULT_UI_LANGUAGE
+
+
+def save_ui_language(code: str) -> None:
+    with _connect() as conn:
+        conn.execute(
+            "INSERT OR REPLACE INTO settings (key, value) VALUES ('ui_language', ?)",
+            (code,),
+        )
+    logger.info(f"UI language saved: {code}")
+
+
 def load_autorun() -> bool:
     with _connect() as conn:
         row = conn.execute("SELECT value FROM settings WHERE key = 'autorun'").fetchone()
