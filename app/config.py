@@ -26,7 +26,7 @@ DB_PATH = DATA_DIR / "data.db"
 LOG_PATH = DATA_DIR / "grammar_ai.log"
 ERROR_LOG_PATH = DATA_DIR / "error.log"
 
-# Cross-lingual polishing — output language for polished text.
+# Cross-lingual polishing - output language for polished text.
 # Maps the friendly label shown in Settings to the value passed to the model. The
 # combobox stays editable, so any language name the model understands also works.
 DEFAULT_OUTPUT_LANGUAGE = "English"
@@ -44,15 +44,15 @@ OUTPUT_LANGUAGES: dict[str, str] = {
     "Turkish (Türkçe)": "Turkish",
     "Arabic (العربية)": "Arabic",
     "Hindi (हिन्दी)": "Hindi",
-    "Chinese — Simplified (简体中文)": "Chinese (Simplified)",
-    "Chinese — Traditional (繁體中文)": "Chinese (Traditional)",
+    "Chinese - Simplified (简体中文)": "Chinese (Simplified)",
+    "Chinese - Traditional (繁體中文)": "Chinese (Traditional)",
     "Japanese (日本語)": "Japanese",
     "Korean (한국어)": "Korean",
     "Vietnamese (Tiếng Việt)": "Vietnamese",
     "Indonesian (Bahasa Indonesia)": "Indonesian",
 }
 
-# Interface localization — language of the app UI itself (distinct from output_language).
+# Interface localization - language of the app UI itself (distinct from output_language).
 # Maps the friendly label shown in Settings to the i18n language code.
 DEFAULT_UI_LANGUAGE = "en"
 UI_LANGUAGES: dict[str, str] = {

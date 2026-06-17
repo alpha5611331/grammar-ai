@@ -2,7 +2,7 @@
 
 UI strings are identified by the `Msg` enum, whose *values* are the English source
 text. Translation tables are keyed by `Msg` members, so both call sites and table
-entries are type-checked — a typo'd key fails at type-check/parse time instead of
+entries are type-checked - a typo'd key fails at type-check/parse time instead of
 silently falling back. Missing translations fall back to the English value.
 
 Tone/goal display names have their own per-language maps keyed by the enum value.

@@ -26,7 +26,7 @@ It can also translate and polish text into the selected output language, so cros
 - Provide fast grammar correction and writing-style polishing
 - Offer multiple tone variations for output
 - Keep the UI simple and easy to use
-- Support cross-lingual polishing — input can be rewritten into the chosen target language
+- Support cross-lingual polishing - input can be rewritten into the chosen target language
 - Store history for future reference
 
 ---
@@ -109,10 +109,10 @@ To build a standalone executable:
 
 ## Project Files
 
-- `main.py` — application entry point
-- `app/` — core application modules
-- `pyproject.toml` — project metadata, dependencies, and linting configuration
-- `build.py` — PyInstaller build script
+- `main.py` - application entry point
+- `app/` - core application modules
+- `pyproject.toml` - project metadata, dependencies, and linting configuration
+- `build.py` - PyInstaller build script
 
 ---
 

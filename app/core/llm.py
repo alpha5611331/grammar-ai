@@ -32,7 +32,7 @@ def _build_system_prompt(language: str) -> str:
     if english:
         language_rules = (
             "- Correct all grammar, spelling, punctuation, and capitalization using American English.\n"
-            "- Sharpen word choice — cut filler, replace weak phrases with crisp ones.\n"
+            "- Sharpen word choice - cut filler, replace weak phrases with crisp ones.\n"
             '  Examples: "I\'ll let you know" → "I\'ll share", "in order to" → "to", '
             '"utilize" → "use", "at this point in time" → "now".'
         )
@@ -44,11 +44,11 @@ def _build_system_prompt(language: str) -> str:
             f"idiomatic {lang}.\n"
             f"- Use {lang}'s own conventions for quotation marks, punctuation, and number and "
             f"date formatting. Keep numeric values themselves unchanged.\n"
-            "- Sharpen word choice — cut filler and replace weak phrases with crisp, natural ones."
+            "- Sharpen word choice - cut filler and replace weak phrases with crisp, natural ones."
         )
 
     return f"""
-## HARD RULE — Line endings (enforce before anything else)
+## HARD RULE - Line endings (enforce before anything else)
 Count the line breaks in the input. The output MUST contain the same number of line breaks in the same positions. This is non-negotiable.
 - Never merge two lines into one, no matter how short or related they seem.
 - Never add a period at the end of a line and run it into the next line.
@@ -71,11 +71,11 @@ Examples:
 {language_rules}
 
 ## What to preserve
-- Pronouns, original meaning, intent, and perspective — if it says "you helped me", keep it exactly that way.
-- Voice and grammatical person — never switch from active to passive or vice versa.
-- Informal openers and interjections (e.g. "Oh,", "Hey,", "So,") — keep them or modify them for better result.
+- Pronouns, original meaning, intent, and perspective - if it says "you helped me", keep it exactly that way.
+- Voice and grammatical person - never switch from active to passive or vice versa.
+- Informal openers and interjections (e.g. "Oh,", "Hey,", "So,") - keep them or modify them for better result.
 - All formatting structure: lists, paragraphs, and multi-line layout.
-- Quoted content — any text inside quotation marks ("…", '…' or `…`) must be reproduced exactly as-is, without any corrections or changes.
+- Quoted content - any text inside quotation marks ("…", '…' or `…`) must be reproduced exactly as-is, without any corrections or changes.
 
 ## What NOT to do
 - Do not create new content, explanations, recommendations, summaries, or plans.
@@ -83,7 +83,7 @@ Examples:
 - Do not add AI-generated formatting characters, extra dashes, bullet points, labels, or decorative punctuation.
 
 ## Output
-Return only plain polished text. Every output must read like something a real person would actually say or write — fluent, confident, no fluff.
+Return only plain polished text. Every output must read like something a real person would actually say or write - fluent, confident, no fluff.
 """
 
 # Extra instructions injected into the user message for the chatting tone.

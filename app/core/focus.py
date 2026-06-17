@@ -33,7 +33,7 @@ def restore_focus_and_paste(hwnd: int, original: str, polished: str) -> bool:
         if original in window_text:
             result = window_text.replace(original, polished, 1)
         else:
-            # original not found (window changed) — fall back to replacing all selected text
+            # original not found (window changed) - fall back to replacing all selected text
             result = polished
 
         pyperclip.copy(result)
