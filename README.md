@@ -24,7 +24,7 @@ It can also translate and polish text into the selected output language, so cros
 
 ![Usage demo](media/how-to-use.gif)
 
-*Select text anywhere, press the hotkey, pick a polished version — done.*
+*Select text anywhere, press the hotkey, pick a polished version - done.*
 
 </div>
 
@@ -63,7 +63,7 @@ Choose an output language in Settings and Grammar AI will translate any source l
 
 <img src="media/cfg-output-langs.png" alt="Output language selection" width="420" />
 
-*Pick from a curated list of output languages — or type any language the model understands.*
+*Pick from a curated list of output languages - or type any language the model understands.*
 
 </div>
 
