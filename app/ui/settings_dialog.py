@@ -7,7 +7,6 @@ from typing import Callable, Optional
 from loguru import logger
 
 from app.config import (
-    GOAL_DESCRIPTIONS,
     GOALS,
     GOALS_PRESET_DEFAULT,
     GOALS_PRESET_MIN,
@@ -25,7 +24,7 @@ from app.db.database import (
     save_selected_goals,
     save_ui_language,
 )
-from app.i18n import Msg, goal_name, t
+from app.i18n import Msg, goal_description, goal_name, t
 from app.schemas.models import Goal, LLMConfig
 
 
@@ -145,8 +144,9 @@ class SettingsDialog(tk.Toplevel):
             self._goal_vars[goal] = var
             cb = ttk.Checkbutton(goals_lf, text=goal_name(goal), variable=var)
             cb.grid(row=(i // 3) + 1, column=i % 3, sticky="w", padx=6, pady=2)
-            if goal in GOAL_DESCRIPTIONS:
-                self._tooltips.append(_Tooltip(cb, GOAL_DESCRIPTIONS[goal]))
+            desc = goal_description(goal)
+            if desc:
+                self._tooltips.append(_Tooltip(cb, desc))
 
         disclaimer_row = (len(GOALS) - 1) // 3 + 2
         ttk.Label(

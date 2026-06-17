@@ -12,6 +12,7 @@ app restart.
 
 from enum import StrEnum
 
+from app.config import GOAL_DESCRIPTIONS as _EN_GOAL_DESCRIPTIONS
 from app.schemas.models import Goal, Tone
 
 DEFAULT_LANGUAGE = "en"
@@ -586,6 +587,77 @@ _GOAL_NAMES: dict[str, dict[Goal, str]] = {
 }
 
 
+# Goal description (tooltip) text keyed by Goal value. English source lives in
+# app.config.GOAL_DESCRIPTIONS and is used as the fallback.
+_GOAL_DESCRIPTIONS: dict[str, dict[Goal, str]] = {
+    "es": {
+        Goal.INFORM: "Presentar los hechos de forma clara y objetiva",
+        Goal.PERSUADE: "Convencer al lector de adoptar un punto de vista o actuar",
+        Goal.REASSURE: "Calmar inquietudes y generar confianza",
+        Goal.MOTIVATE: "Inspirar entusiasmo e impulsar la acción",
+        Goal.CLARIFY: "Simplificar y hacer el significado inequívoco",
+        Goal.APOLOGIZE: "Expresar arrepentimiento y asumir la responsabilidad",
+        Goal.REQUEST: "Pedir cortésmente una acción o información",
+        Goal.ACKNOWLEDGE: "Validar el punto, el esfuerzo o los sentimientos del lector",
+        Goal.ENGAGE: "Hacer el texto más interesante y conversacional",
+        Goal.REVIEW: "Evaluar críticamente con comentarios equilibrados y constructivos",
+        Goal.CLEAN: "Eliminar el relleno y ceñirse al significado esencial",
+    },
+    "fr": {
+        Goal.INFORM: "Présenter les faits de façon claire et objective",
+        Goal.PERSUADE: "Convaincre le lecteur d'adopter un point de vue ou d'agir",
+        Goal.REASSURE: "Apaiser les inquiétudes et instaurer la confiance",
+        Goal.MOTIVATE: "Susciter l'enthousiasme et inciter à l'action",
+        Goal.CLARIFY: "Simplifier et rendre le sens sans ambiguïté",
+        Goal.APOLOGIZE: "Exprimer des regrets et assumer ses responsabilités",
+        Goal.REQUEST: "Demander poliment une action ou une information",
+        Goal.ACKNOWLEDGE: "Valider le point de vue, l'effort ou les sentiments du lecteur",
+        Goal.ENGAGE: "Rendre le texte plus intéressant et conversationnel",
+        Goal.REVIEW: "Évaluer de façon critique avec un retour équilibré et constructif",
+        Goal.CLEAN: "Éliminer le superflu et resserrer sur l'essentiel",
+    },
+    "de": {
+        Goal.INFORM: "Fakten klar und objektiv darstellen",
+        Goal.PERSUADE: "Den Leser von einer Sichtweise überzeugen oder zum Handeln bewegen",
+        Goal.REASSURE: "Bedenken zerstreuen und Vertrauen aufbauen",
+        Goal.MOTIVATE: "Begeisterung wecken und zum Handeln antreiben",
+        Goal.CLARIFY: "Vereinfachen und die Bedeutung eindeutig machen",
+        Goal.APOLOGIZE: "Bedauern ausdrücken und Verantwortung übernehmen",
+        Goal.REQUEST: "Höflich um eine Handlung oder Information bitten",
+        Goal.ACKNOWLEDGE: "Den Standpunkt, die Mühe oder die Gefühle des Lesers anerkennen",
+        Goal.ENGAGE: "Den Text interessanter und gesprächiger gestalten",
+        Goal.REVIEW: "Kritisch mit ausgewogenem, konstruktivem Feedback bewerten",
+        Goal.CLEAN: "Überflüssiges entfernen und auf das Wesentliche straffen",
+    },
+    "ja": {
+        Goal.INFORM: "事実を明確かつ客観的に伝える",
+        Goal.PERSUADE: "読者に考えを受け入れさせ、行動を促す",
+        Goal.REASSURE: "不安を和らげ、信頼を築く",
+        Goal.MOTIVATE: "熱意を引き出し、行動を促す",
+        Goal.CLARIFY: "簡潔にして意味を明確にする",
+        Goal.APOLOGIZE: "遺憾の意を表し、責任を負う",
+        Goal.REQUEST: "行動や情報を丁寧に依頼する",
+        Goal.ACKNOWLEDGE: "読者の主張、努力、感情を認める",
+        Goal.ENGAGE: "文章をより面白く会話的にする",
+        Goal.REVIEW: "バランスの取れた建設的なフィードバックで批評する",
+        Goal.CLEAN: "無駄を省き、本質的な意味に引き締める",
+    },
+    "ko": {
+        Goal.INFORM: "사실을 명확하고 객관적으로 전달",
+        Goal.PERSUADE: "독자가 관점을 받아들이거나 행동하도록 설득",
+        Goal.REASSURE: "우려를 가라앉히고 신뢰를 형성",
+        Goal.MOTIVATE: "열정을 불러일으키고 행동을 유도",
+        Goal.CLARIFY: "단순화하여 의미를 명확하게",
+        Goal.APOLOGIZE: "유감을 표하고 책임을 짐",
+        Goal.REQUEST: "행동이나 정보를 정중하게 요청",
+        Goal.ACKNOWLEDGE: "독자의 주장, 노력, 감정을 인정",
+        Goal.ENGAGE: "글을 더 흥미롭고 대화체로 만듦",
+        Goal.REVIEW: "균형 잡힌 건설적인 피드백으로 비평",
+        Goal.CLEAN: "군더더기를 없애고 핵심 의미로 다듬음",
+    },
+}
+
+
 def set_language(code: str) -> None:
     global _current
     _current = code or DEFAULT_LANGUAGE
@@ -606,3 +678,11 @@ def tone_name(tone: Tone) -> str:
 
 def goal_name(goal: Goal) -> str:
     return _GOAL_NAMES.get(_current, {}).get(goal, goal.capitalize())
+
+
+def goal_description(goal: Goal) -> str:
+    """Localized tooltip description for a goal; falls back to the English source."""
+    localized = _GOAL_DESCRIPTIONS.get(_current, {}).get(goal)
+    if localized is not None:
+        return localized
+    return _EN_GOAL_DESCRIPTIONS.get(goal, "")
