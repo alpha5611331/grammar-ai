@@ -63,7 +63,7 @@ class MainWindow(tk.Tk):
         if tray_only:
             self.withdraw()
         self._version = get_app_version()
-        self.title(f"{APP_NAME} v{self._version}")
+        self.title(APP_NAME)
         self.attributes("-alpha", 1.0)
         self.geometry(WINDOW_GEOMETRY)
         self.minsize(*WINDOW_MIN_SIZE)
