@@ -1,3 +1,5 @@
+import os
+import sys
 import tkinter as tk
 from tkinter import messagebox, ttk
 from typing import Callable, Optional
@@ -5,7 +7,6 @@ from typing import Callable, Optional
 from loguru import logger
 
 from app.config import (
-    GOAL_DESCRIPTIONS,
     GOALS,
     GOALS_PRESET_DEFAULT,
     GOALS_PRESET_MIN,
@@ -23,7 +24,7 @@ from app.db.database import (
     save_selected_goals,
     save_ui_language,
 )
-from app.i18n import Msg, goal_name, t
+from app.i18n import Msg, goal_description, goal_name, t
 from app.schemas.models import Goal, LLMConfig
 
 
@@ -143,8 +144,9 @@ class SettingsDialog(tk.Toplevel):
             self._goal_vars[goal] = var
             cb = ttk.Checkbutton(goals_lf, text=goal_name(goal), variable=var)
             cb.grid(row=(i // 3) + 1, column=i % 3, sticky="w", padx=6, pady=2)
-            if goal in GOAL_DESCRIPTIONS:
-                self._tooltips.append(_Tooltip(cb, GOAL_DESCRIPTIONS[goal]))
+            desc = goal_description(goal)
+            if desc:
+                self._tooltips.append(_Tooltip(cb, desc))
 
         disclaimer_row = (len(GOALS) - 1) // 3 + 2
         ttk.Label(
@@ -258,7 +260,7 @@ class SettingsDialog(tk.Toplevel):
         self.update_idletasks()
         ok, msg = check_connection(self._current())
         self._status.config(text=msg, foreground="green" if ok else "red")
-        logger.info(f"Config test result: {ok} — {msg}")
+        logger.info(f"Config test result: {ok} - {msg}")
 
     def _save(self) -> None:
         cfg = self._current()
@@ -291,14 +293,64 @@ class SettingsDialog(tk.Toplevel):
         ui_lang_changed = ui_lang != self._initial_ui_lang
 
         logger.info("Settings saved and applied")
-        self.destroy()
 
-        if ui_lang_changed:
-            messagebox.showinfo(
-                t(Msg.SETTINGS),
-                t(Msg.RESTART_TO_APPLY_LANGUAGE),
-                parent=self.master,
-            )
+        if ui_lang_changed and self._confirm_restart():
+            self._restart_app()
+        else:
+            self.destroy()
+
+    def _confirm_restart(self) -> bool:
+        dlg = tk.Toplevel(self)
+        dlg.title(t(Msg.SETTINGS))
+        dlg.resizable(False, False)
+        dlg.transient(self)
+        dlg.grab_set()
+
+        frame = ttk.Frame(dlg, padding=12)
+        frame.pack(fill="both", expand=True)
+
+        ttk.Label(
+            frame,
+            text=t(Msg.RESTART_TO_APPLY_LANGUAGE),
+            wraplength=380,
+            font=("", 10),
+        ).pack(fill="x", padx=4, pady=(0, 12))
+
+        result = {"restart": False}
+
+        def restart_now() -> None:
+            result["restart"] = True
+            dlg.destroy()
+
+        def restart_later() -> None:
+            dlg.destroy()
+
+        button_row = ttk.Frame(frame)
+        button_row.pack(fill="x", pady=(0, 4))
+        restart_btn = ttk.Button(button_row, text=t(Msg.RESTART_NOW), command=restart_now)
+        restart_btn.pack(side="left", padx=(0, 8))
+        restart_btn.focus()
+        ttk.Button(button_row, text=t(Msg.RESTART_LATER), command=restart_later).pack(
+            side="left"
+        )
+
+        dlg.protocol("WM_DELETE_WINDOW", restart_later)
+        dlg.update_idletasks()
+
+        x = self.winfo_rootx() + (self.winfo_width() - dlg.winfo_width()) // 2
+        y = self.winfo_rooty() + (self.winfo_height() - dlg.winfo_height()) // 2
+        dlg.geometry(f"+{x}+{y}")
+
+        self.wait_window(dlg)
+        return result["restart"]
+
+    def _restart_app(self) -> None:
+        root = self.winfo_toplevel()
+        try:
+            root.destroy()
+        except Exception:
+            pass
+        os.execv(sys.executable, [sys.executable, *sys.argv])
 
     def _center(self, parent: tk.Widget) -> None:
         parent_win = parent.winfo_toplevel()

@@ -2,7 +2,7 @@
 
 UI strings are identified by the `Msg` enum, whose *values* are the English source
 text. Translation tables are keyed by `Msg` members, so both call sites and table
-entries are type-checked — a typo'd key fails at type-check/parse time instead of
+entries are type-checked - a typo'd key fails at type-check/parse time instead of
 silently falling back. Missing translations fall back to the English value.
 
 Tone/goal display names have their own per-language maps keyed by the enum value.
@@ -12,6 +12,7 @@ app restart.
 
 from enum import StrEnum
 
+from app.config import GOAL_DESCRIPTIONS as _EN_GOAL_DESCRIPTIONS
 from app.schemas.models import Goal, Tone
 
 DEFAULT_LANGUAGE = "en"
@@ -86,6 +87,8 @@ class Msg(StrEnum):
     NO_GOALS_SELECTED = "No goals selected"
     SELECT_AT_LEAST_ONE_GOAL = "Select at least one goal."
     RESTART_TO_APPLY_LANGUAGE = "Restart Grammar AI to apply the new interface language."
+    RESTART_NOW = "Restart Now"
+    RESTART_LATER = "Restart Later"
 
     # history tab
     REFRESH = "Refresh"
@@ -160,6 +163,8 @@ _TRANSLATIONS: dict[str, dict[Msg, str]] = {
         Msg.NO_GOALS_SELECTED: "Ningún objetivo seleccionado",
         Msg.SELECT_AT_LEAST_ONE_GOAL: "Selecciona al menos un objetivo.",
         Msg.RESTART_TO_APPLY_LANGUAGE: "Reinicia Grammar AI para aplicar el nuevo idioma de la interfaz.",
+        Msg.RESTART_NOW: "Reiniciar ahora",
+        Msg.RESTART_LATER: "Reiniciar más tarde",
         Msg.REFRESH: "Actualizar",
         Msg.PAGE_SIZE: "Tamaño de página:",
         Msg.PREV: "Anterior",
@@ -229,6 +234,8 @@ _TRANSLATIONS: dict[str, dict[Msg, str]] = {
         Msg.NO_GOALS_SELECTED: "Aucun objectif sélectionné",
         Msg.SELECT_AT_LEAST_ONE_GOAL: "Sélectionnez au moins un objectif.",
         Msg.RESTART_TO_APPLY_LANGUAGE: "Redémarrez Grammar AI pour appliquer la nouvelle langue de l'interface.",
+        Msg.RESTART_NOW: "Redémarrer maintenant",
+        Msg.RESTART_LATER: "Redémarrer plus tard",
         Msg.REFRESH: "Actualiser",
         Msg.PAGE_SIZE: "Taille de page :",
         Msg.PREV: "Préc.",
@@ -298,6 +305,8 @@ _TRANSLATIONS: dict[str, dict[Msg, str]] = {
         Msg.NO_GOALS_SELECTED: "Keine Ziele ausgewählt",
         Msg.SELECT_AT_LEAST_ONE_GOAL: "Wähle mindestens ein Ziel aus.",
         Msg.RESTART_TO_APPLY_LANGUAGE: "Starte Grammar AI neu, um die neue Oberflächensprache anzuwenden.",
+        Msg.RESTART_NOW: "Jetzt neu starten",
+        Msg.RESTART_LATER: "Später neu starten",
         Msg.REFRESH: "Aktualisieren",
         Msg.PAGE_SIZE: "Seitengröße:",
         Msg.PREV: "Zurück",
@@ -367,6 +376,8 @@ _TRANSLATIONS: dict[str, dict[Msg, str]] = {
         Msg.NO_GOALS_SELECTED: "目標が選択されていません",
         Msg.SELECT_AT_LEAST_ONE_GOAL: "少なくとも1つの目標を選択してください。",
         Msg.RESTART_TO_APPLY_LANGUAGE: "新しいインターフェース言語を適用するにはGrammar AIを再起動してください。",
+        Msg.RESTART_NOW: "今すぐ再起動",
+        Msg.RESTART_LATER: "後で再起動",
         Msg.REFRESH: "更新",
         Msg.PAGE_SIZE: "ページサイズ:",
         Msg.PREV: "前へ",
@@ -436,6 +447,8 @@ _TRANSLATIONS: dict[str, dict[Msg, str]] = {
         Msg.NO_GOALS_SELECTED: "선택된 목표 없음",
         Msg.SELECT_AT_LEAST_ONE_GOAL: "최소 한 개의 목표를 선택하세요.",
         Msg.RESTART_TO_APPLY_LANGUAGE: "새 인터페이스 언어를 적용하려면 Grammar AI를 다시 시작하세요.",
+        Msg.RESTART_NOW: "지금 다시 시작",
+        Msg.RESTART_LATER: "나중에 다시 시작",
         Msg.REFRESH: "새로 고침",
         Msg.PAGE_SIZE: "페이지 크기:",
         Msg.PREV: "이전",
@@ -574,6 +587,77 @@ _GOAL_NAMES: dict[str, dict[Goal, str]] = {
 }
 
 
+# Goal description (tooltip) text keyed by Goal value. English source lives in
+# app.config.GOAL_DESCRIPTIONS and is used as the fallback.
+_GOAL_DESCRIPTIONS: dict[str, dict[Goal, str]] = {
+    "es": {
+        Goal.INFORM: "Presentar los hechos de forma clara y objetiva",
+        Goal.PERSUADE: "Convencer al lector de adoptar un punto de vista o actuar",
+        Goal.REASSURE: "Calmar inquietudes y generar confianza",
+        Goal.MOTIVATE: "Inspirar entusiasmo e impulsar la acción",
+        Goal.CLARIFY: "Simplificar y hacer el significado inequívoco",
+        Goal.APOLOGIZE: "Expresar arrepentimiento y asumir la responsabilidad",
+        Goal.REQUEST: "Pedir cortésmente una acción o información",
+        Goal.ACKNOWLEDGE: "Validar el punto, el esfuerzo o los sentimientos del lector",
+        Goal.ENGAGE: "Hacer el texto más interesante y conversacional",
+        Goal.REVIEW: "Evaluar críticamente con comentarios equilibrados y constructivos",
+        Goal.CLEAN: "Eliminar el relleno y ceñirse al significado esencial",
+    },
+    "fr": {
+        Goal.INFORM: "Présenter les faits de façon claire et objective",
+        Goal.PERSUADE: "Convaincre le lecteur d'adopter un point de vue ou d'agir",
+        Goal.REASSURE: "Apaiser les inquiétudes et instaurer la confiance",
+        Goal.MOTIVATE: "Susciter l'enthousiasme et inciter à l'action",
+        Goal.CLARIFY: "Simplifier et rendre le sens sans ambiguïté",
+        Goal.APOLOGIZE: "Exprimer des regrets et assumer ses responsabilités",
+        Goal.REQUEST: "Demander poliment une action ou une information",
+        Goal.ACKNOWLEDGE: "Valider le point de vue, l'effort ou les sentiments du lecteur",
+        Goal.ENGAGE: "Rendre le texte plus intéressant et conversationnel",
+        Goal.REVIEW: "Évaluer de façon critique avec un retour équilibré et constructif",
+        Goal.CLEAN: "Éliminer le superflu et resserrer sur l'essentiel",
+    },
+    "de": {
+        Goal.INFORM: "Fakten klar und objektiv darstellen",
+        Goal.PERSUADE: "Den Leser von einer Sichtweise überzeugen oder zum Handeln bewegen",
+        Goal.REASSURE: "Bedenken zerstreuen und Vertrauen aufbauen",
+        Goal.MOTIVATE: "Begeisterung wecken und zum Handeln antreiben",
+        Goal.CLARIFY: "Vereinfachen und die Bedeutung eindeutig machen",
+        Goal.APOLOGIZE: "Bedauern ausdrücken und Verantwortung übernehmen",
+        Goal.REQUEST: "Höflich um eine Handlung oder Information bitten",
+        Goal.ACKNOWLEDGE: "Den Standpunkt, die Mühe oder die Gefühle des Lesers anerkennen",
+        Goal.ENGAGE: "Den Text interessanter und gesprächiger gestalten",
+        Goal.REVIEW: "Kritisch mit ausgewogenem, konstruktivem Feedback bewerten",
+        Goal.CLEAN: "Überflüssiges entfernen und auf das Wesentliche straffen",
+    },
+    "ja": {
+        Goal.INFORM: "事実を明確かつ客観的に伝える",
+        Goal.PERSUADE: "読者に考えを受け入れさせ、行動を促す",
+        Goal.REASSURE: "不安を和らげ、信頼を築く",
+        Goal.MOTIVATE: "熱意を引き出し、行動を促す",
+        Goal.CLARIFY: "簡潔にして意味を明確にする",
+        Goal.APOLOGIZE: "遺憾の意を表し、責任を負う",
+        Goal.REQUEST: "行動や情報を丁寧に依頼する",
+        Goal.ACKNOWLEDGE: "読者の主張、努力、感情を認める",
+        Goal.ENGAGE: "文章をより面白く会話的にする",
+        Goal.REVIEW: "バランスの取れた建設的なフィードバックで批評する",
+        Goal.CLEAN: "無駄を省き、本質的な意味に引き締める",
+    },
+    "ko": {
+        Goal.INFORM: "사실을 명확하고 객관적으로 전달",
+        Goal.PERSUADE: "독자가 관점을 받아들이거나 행동하도록 설득",
+        Goal.REASSURE: "우려를 가라앉히고 신뢰를 형성",
+        Goal.MOTIVATE: "열정을 불러일으키고 행동을 유도",
+        Goal.CLARIFY: "단순화하여 의미를 명확하게",
+        Goal.APOLOGIZE: "유감을 표하고 책임을 짐",
+        Goal.REQUEST: "행동이나 정보를 정중하게 요청",
+        Goal.ACKNOWLEDGE: "독자의 주장, 노력, 감정을 인정",
+        Goal.ENGAGE: "글을 더 흥미롭고 대화체로 만듦",
+        Goal.REVIEW: "균형 잡힌 건설적인 피드백으로 비평",
+        Goal.CLEAN: "군더더기를 없애고 핵심 의미로 다듬음",
+    },
+}
+
+
 def set_language(code: str) -> None:
     global _current
     _current = code or DEFAULT_LANGUAGE
@@ -594,3 +678,11 @@ def tone_name(tone: Tone) -> str:
 
 def goal_name(goal: Goal) -> str:
     return _GOAL_NAMES.get(_current, {}).get(goal, goal.capitalize())
+
+
+def goal_description(goal: Goal) -> str:
+    """Localized tooltip description for a goal; falls back to the English source."""
+    localized = _GOAL_DESCRIPTIONS.get(_current, {}).get(goal)
+    if localized is not None:
+        return localized
+    return _EN_GOAL_DESCRIPTIONS.get(goal, "")

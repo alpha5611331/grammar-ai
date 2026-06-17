@@ -8,7 +8,7 @@ from typing import Callable, Optional
 import pyperclip
 from loguru import logger
 
-from app.config import GOALS, HOTKEYS, LOG_PATH, TONES
+from app.config import GOALS, HOTKEYS, LOG_PATH, OUTPUT_LANGUAGES, TONES
 from app.core.focus import restore_focus_and_paste
 from app.core.hotkey import HotkeyManager
 from app.core.llm import polish_text
@@ -152,7 +152,7 @@ class MainTab(ttk.Frame):
             textvariable=self._tone_var,
             values=[tone_name(tn) for tn in TONES],
             state="readonly",
-            width=11,
+            width=18,
         )
         tone_combo.pack(side="left", padx=(4, 8))
         tone_combo.bind("<<ComboboxSelected>>", self._on_tone_change)
@@ -172,8 +172,14 @@ class MainTab(ttk.Frame):
         self._status_lbl = ttk.Label(row, textvariable=self._status_var, font=("", 8))
         self._status_lbl.pack(side="left")
 
+    def _results_title(self) -> str:
+        value = self._config.output_language
+        label = {v: k for k, v in OUTPUT_LANGUAGES.items()}.get(value, value)
+        return t(Msg.POLISHED_VERSIONS) + ": " + label
+
     def _build_results(self) -> None:
-        lf = ttk.LabelFrame(self, text=t(Msg.POLISHED_VERSIONS), padding=4)
+        self._results_lf = ttk.LabelFrame(self, text=self._results_title(), padding=4)
+        lf = self._results_lf
         lf.pack(fill="both", expand=True, padx=6, pady=(0, 6))
 
         canvas = tk.Canvas(lf, borderwidth=0, highlightthickness=0)
@@ -233,6 +239,7 @@ class MainTab(ttk.Frame):
     def _on_config_saved(self, config: LLMConfig) -> None:
         self._config = config
         self._selected_goals = load_selected_goals()
+        self._results_lf.config(text=self._results_title())
 
     def _current_tone(self) -> Tone:
         return self._tone_by_label.get(self._tone_var.get(), TONES[0])

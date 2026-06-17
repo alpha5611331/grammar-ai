@@ -1,4 +1,4 @@
-"""Global hotkey via Win32 RegisterHotKey — reliable across apps and system load."""
+"""Global hotkey via Win32 RegisterHotKey - reliable across apps and system load."""
 
 import ctypes
 import ctypes.wintypes
@@ -58,7 +58,7 @@ class HotkeyManager:
         )
         if not ok:
             err = ctypes.GetLastError()  # type: ignore[attr-defined]
-            logger.error(f"RegisterHotKey failed (error {err}) — hotkey unavailable")
+            logger.error(f"RegisterHotKey failed (error {err}) - hotkey unavailable")
             self._enabled = False
             return
 
@@ -74,7 +74,7 @@ class HotkeyManager:
 
     def _capture(self) -> None:
         if not self._capture_lock.acquire(blocking=False):
-            logger.debug("Hotkey fired during active capture — ignored")
+            logger.debug("Hotkey fired during active capture - ignored")
             return
         try:
             self._do_capture()
@@ -92,7 +92,7 @@ class HotkeyManager:
         text = self._poll_clipboard(timeout=0.4)
 
         if not text or not text.strip():
-            # Nothing selected — select all then copy.
+            # Nothing selected - select all then copy.
             pyautogui.hotkey("ctrl", "a")
             time.sleep(0.05)
             pyperclip.copy("")

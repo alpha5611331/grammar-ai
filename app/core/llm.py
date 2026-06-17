@@ -1,4 +1,5 @@
 import json
+import time
 from typing import Callable, Optional
 
 from loguru import logger
@@ -31,7 +32,7 @@ def _build_system_prompt(language: str) -> str:
     if english:
         language_rules = (
             "- Correct all grammar, spelling, punctuation, and capitalization using American English.\n"
-            "- Sharpen word choice — cut filler, replace weak phrases with crisp ones.\n"
+            "- Sharpen word choice - cut filler, replace weak phrases with crisp ones.\n"
             '  Examples: "I\'ll let you know" → "I\'ll share", "in order to" → "to", '
             '"utilize" → "use", "at this point in time" → "now".'
         )
@@ -43,11 +44,11 @@ def _build_system_prompt(language: str) -> str:
             f"idiomatic {lang}.\n"
             f"- Use {lang}'s own conventions for quotation marks, punctuation, and number and "
             f"date formatting. Keep numeric values themselves unchanged.\n"
-            "- Sharpen word choice — cut filler and replace weak phrases with crisp, natural ones."
+            "- Sharpen word choice - cut filler and replace weak phrases with crisp, natural ones."
         )
 
     return f"""
-## HARD RULE — Line endings (enforce before anything else)
+## HARD RULE - Line endings (enforce before anything else)
 Count the line breaks in the input. The output MUST contain the same number of line breaks in the same positions. This is non-negotiable.
 - Never merge two lines into one, no matter how short or related they seem.
 - Never add a period at the end of a line and run it into the next line.
@@ -70,11 +71,11 @@ Examples:
 {language_rules}
 
 ## What to preserve
-- Pronouns, original meaning, intent, and perspective — if it says "you helped me", keep it exactly that way.
-- Voice and grammatical person — never switch from active to passive or vice versa.
-- Informal openers and interjections (e.g. "Oh,", "Hey,", "So,") — keep them or modify them for better result.
+- Pronouns, original meaning, intent, and perspective - if it says "you helped me", keep it exactly that way.
+- Voice and grammatical person - never switch from active to passive or vice versa.
+- Informal openers and interjections (e.g. "Oh,", "Hey,", "So,") - keep them or modify them for better result.
 - All formatting structure: lists, paragraphs, and multi-line layout.
-- Quoted content — any text inside quotation marks ("…", '…' or `…`) must be reproduced exactly as-is, without any corrections or changes.
+- Quoted content - any text inside quotation marks ("…", '…' or `…`) must be reproduced exactly as-is, without any corrections or changes.
 
 ## What NOT to do
 - Do not create new content, explanations, recommendations, summaries, or plans.
@@ -82,7 +83,7 @@ Examples:
 - Do not add AI-generated formatting characters, extra dashes, bullet points, labels, or decorative punctuation.
 
 ## Output
-Return only plain polished text. Every output must read like something a real person would actually say or write — fluent, confident, no fluff.
+Return only plain polished text. Every output must read like something a real person would actually say or write - fluent, confident, no fluff.
 """
 
 # Extra instructions injected into the user message for the chatting tone.
@@ -119,6 +120,8 @@ def _tone_extra(tone: Tone, language: str) -> str:
 
 # Reuse one client per (api_key, base_url) pair to avoid repeated connection pool creation.
 _clients: dict[tuple[str, str], OpenAI] = {}
+_MAX_INFERENCE_ATTEMPTS = 3
+_BACKOFF_INITIAL_SECONDS = 1
 
 
 def _get_client(config: LLMConfig) -> OpenAI:
@@ -126,6 +129,35 @@ def _get_client(config: LLMConfig) -> OpenAI:
     if key not in _clients:
         _clients[key] = OpenAI(api_key=config.api_key, base_url=config.base_url)
     return _clients[key]
+
+
+def _create_chat_completion(client: OpenAI, **kwargs):
+    last_exception: Exception | None = None
+    for attempt in range(1, _MAX_INFERENCE_ATTEMPTS + 1):
+        try:
+            return client.chat.completions.create(**kwargs)
+        except OpenAIError as e:
+            last_exception = e
+            if attempt == _MAX_INFERENCE_ATTEMPTS:
+                logger.error(f"LLM request failed after {attempt} attempts: {e}")
+                raise
+            delay = _BACKOFF_INITIAL_SECONDS * (2 ** (attempt - 1))
+            logger.warning(
+                f"LLM request failed (attempt {attempt}/{_MAX_INFERENCE_ATTEMPTS}): {e}. Retrying in {delay}s..."
+            )
+        except Exception as e:
+            last_exception = e
+            if attempt == _MAX_INFERENCE_ATTEMPTS:
+                logger.error(f"LLM request failed after {attempt} attempts: {e}")
+                raise
+            delay = _BACKOFF_INITIAL_SECONDS * (2 ** (attempt - 1))
+            logger.warning(
+                f"Unexpected error calling LLM (attempt {attempt}/{_MAX_INFERENCE_ATTEMPTS}): "
+                f"{type(e).__name__}: {e}. Retrying in {delay}s..."
+            )
+        time.sleep(delay)
+
+    raise last_exception or RuntimeError("Unexpected LLM retry failure")
 
 
 def _format_batch_request(text: str, tone: Tone, goals: list[Goal], language: str) -> str:
@@ -173,10 +205,10 @@ def polish_text(
                 f"{config.output_language} first, then polish it."
             )
 
-    response = client.chat.completions.create(
+    response = _create_chat_completion(
+        client,
         model=config.model,
         response_format={"type": "json_object"},
-        max_tokens=8192,
         messages=[
             {"role": "system", "content": system_prompt},
             {
