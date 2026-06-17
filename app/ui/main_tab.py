@@ -175,7 +175,7 @@ class MainTab(ttk.Frame):
     def _results_title(self) -> str:
         value = self._config.output_language
         label = {v: k for k, v in OUTPUT_LANGUAGES.items()}.get(value, value)
-        return t(Msg.POLISHED_VERSIONS) + " - " + label
+        return t(Msg.POLISHED_VERSIONS) + ": " + label
 
     def _build_results(self) -> None:
         self._results_lf = ttk.LabelFrame(self, text=self._results_title(), padding=4)
