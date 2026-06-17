@@ -113,7 +113,7 @@ Grammar AI supports any LLM provider that is OpenAI-compatible, including OpenAI
 ### Example Configuration (OpenAI)
 
 - **Base URL**: `https://api.openai.com/v1`
-- **Model**: `gpt-4o-mini`
+- **Model**: `gpt-5.4-mini`
 - **API Key**: `YOUR_OPENAI_API_KEY`
 
 To configure:
