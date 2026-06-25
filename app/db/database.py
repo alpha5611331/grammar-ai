@@ -48,8 +48,7 @@ def load_config() -> LLMConfig:
         model=data.get("model", "gpt-4o-mini"),
         api_key=data.get("api_key", ""),
         output_language=data.get("output_language", "English"),
-        use_default_prompt=data.get("use_default_prompt", "True") == "True",
-        custom_prompt=data.get("custom_prompt", ""),
+        context=data.get("context", ""),
     )
 
 
@@ -63,7 +62,7 @@ def save_config(config: LLMConfig) -> None:
     logger.info("Config saved")
 
 
-def save_history(original: str, polished: str, tone: str, goal: str = "") -> None:
+def save_history(original: str, polished: str, tone: Tone, goal: Goal) -> None:
     with _connect() as conn:
         conn.execute(
             "INSERT INTO history (original_text, polished_text, tone, goal) VALUES (?, ?, ?, ?)",

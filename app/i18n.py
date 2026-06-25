@@ -74,9 +74,12 @@ class Msg(StrEnum):
     DEFAULT = "Default"
     ALL = "All"
     MORE_GOALS_DISCLAIMER = "More goals = longer generation time."
-    ADVANCED = "Advanced"
-    USE_DEFAULT_PROMPT = "Use Default System Prompt"
-    CUSTOM_PROMPT = "Custom Prompt:"
+    CONTEXT = "Context:"
+    CONTEXT_TOOLTIP = (
+        "Describe the domain or situation your text belongs to\n"
+        "(e.g. 'customer support', 'technical docs', 'sales emails').\n"
+        "The LLM will strongly follow this context when polishing."
+    )
     TEST_CONNECTION = "Test Connection"
     SAVE = "Save"
     CANCEL = "Cancel"
@@ -150,9 +153,6 @@ _TRANSLATIONS: dict[str, dict[Msg, str]] = {
         Msg.DEFAULT: "Predeterminado",
         Msg.ALL: "Todos",
         Msg.MORE_GOALS_DISCLAIMER: "Más objetivos = mayor tiempo de generación.",
-        Msg.ADVANCED: "Avanzado",
-        Msg.USE_DEFAULT_PROMPT: "Usar el prompt de sistema predeterminado",
-        Msg.CUSTOM_PROMPT: "Prompt personalizado:",
         Msg.TEST_CONNECTION: "Probar conexión",
         Msg.SAVE: "Guardar",
         Msg.CANCEL: "Cancelar",
@@ -165,6 +165,8 @@ _TRANSLATIONS: dict[str, dict[Msg, str]] = {
         Msg.RESTART_TO_APPLY_LANGUAGE: "Reinicia Grammar AI para aplicar el nuevo idioma de la interfaz.",
         Msg.RESTART_NOW: "Reiniciar ahora",
         Msg.RESTART_LATER: "Reiniciar más tarde",
+        Msg.CONTEXT: "Contexto:",
+        Msg.CONTEXT_TOOLTIP: "Describe el dominio o situación de tu texto\n(p. ej. 'soporte al cliente', 'docs técnicos', 'emails de ventas').\nEl LLM seguirá este contexto estrictamente al pulir el texto.",
         Msg.REFRESH: "Actualizar",
         Msg.PAGE_SIZE: "Tamaño de página:",
         Msg.PREV: "Anterior",
@@ -221,9 +223,6 @@ _TRANSLATIONS: dict[str, dict[Msg, str]] = {
         Msg.DEFAULT: "Par défaut",
         Msg.ALL: "Tous",
         Msg.MORE_GOALS_DISCLAIMER: "Plus d'objectifs = temps de génération plus long.",
-        Msg.ADVANCED: "Avancé",
-        Msg.USE_DEFAULT_PROMPT: "Utiliser l'invite système par défaut",
-        Msg.CUSTOM_PROMPT: "Invite personnalisée :",
         Msg.TEST_CONNECTION: "Tester la connexion",
         Msg.SAVE: "Enregistrer",
         Msg.CANCEL: "Annuler",
@@ -236,6 +235,8 @@ _TRANSLATIONS: dict[str, dict[Msg, str]] = {
         Msg.RESTART_TO_APPLY_LANGUAGE: "Redémarrez Grammar AI pour appliquer la nouvelle langue de l'interface.",
         Msg.RESTART_NOW: "Redémarrer maintenant",
         Msg.RESTART_LATER: "Redémarrer plus tard",
+        Msg.CONTEXT: "Contexte :",
+        Msg.CONTEXT_TOOLTIP: "Décrivez le domaine ou la situation de votre texte\n(ex. 'support client', 'docs techniques', 'e-mails commerciaux').\nLe LLM respectera strictement ce contexte lors du peaufinage.",
         Msg.REFRESH: "Actualiser",
         Msg.PAGE_SIZE: "Taille de page :",
         Msg.PREV: "Préc.",
@@ -292,9 +293,6 @@ _TRANSLATIONS: dict[str, dict[Msg, str]] = {
         Msg.DEFAULT: "Standard",
         Msg.ALL: "Alle",
         Msg.MORE_GOALS_DISCLAIMER: "Mehr Ziele = längere Generierungszeit.",
-        Msg.ADVANCED: "Erweitert",
-        Msg.USE_DEFAULT_PROMPT: "Standard-System-Prompt verwenden",
-        Msg.CUSTOM_PROMPT: "Benutzerdefinierter Prompt:",
         Msg.TEST_CONNECTION: "Verbindung testen",
         Msg.SAVE: "Speichern",
         Msg.CANCEL: "Abbrechen",
@@ -307,6 +305,8 @@ _TRANSLATIONS: dict[str, dict[Msg, str]] = {
         Msg.RESTART_TO_APPLY_LANGUAGE: "Starte Grammar AI neu, um die neue Oberflächensprache anzuwenden.",
         Msg.RESTART_NOW: "Jetzt neu starten",
         Msg.RESTART_LATER: "Später neu starten",
+        Msg.CONTEXT: "Kontext:",
+        Msg.CONTEXT_TOOLTIP: "Beschreibe die Domäne oder Situation deines Textes\n(z. B. 'Kundensupport', 'technische Doku', 'Verkaufs-E-Mails').\nDas LLM folgt diesem Kontext strikt beim Verfeinern.",
         Msg.REFRESH: "Aktualisieren",
         Msg.PAGE_SIZE: "Seitengröße:",
         Msg.PREV: "Zurück",
@@ -363,9 +363,6 @@ _TRANSLATIONS: dict[str, dict[Msg, str]] = {
         Msg.DEFAULT: "デフォルト",
         Msg.ALL: "すべて",
         Msg.MORE_GOALS_DISCLAIMER: "目標が多いほど生成時間が長くなります。",
-        Msg.ADVANCED: "詳細設定",
-        Msg.USE_DEFAULT_PROMPT: "デフォルトのシステムプロンプトを使用",
-        Msg.CUSTOM_PROMPT: "カスタムプロンプト:",
         Msg.TEST_CONNECTION: "接続をテスト",
         Msg.SAVE: "保存",
         Msg.CANCEL: "キャンセル",
@@ -378,6 +375,8 @@ _TRANSLATIONS: dict[str, dict[Msg, str]] = {
         Msg.RESTART_TO_APPLY_LANGUAGE: "新しいインターフェース言語を適用するにはGrammar AIを再起動してください。",
         Msg.RESTART_NOW: "今すぐ再起動",
         Msg.RESTART_LATER: "後で再起動",
+        Msg.CONTEXT: "コンテキスト:",
+        Msg.CONTEXT_TOOLTIP: "テキストのドメインや状況を説明してください\n(例: 'カスタマーサポート', '技術ドキュメント', '営業メール')。\nLLMは推敲時にこのコンテキストを厳守します。",
         Msg.REFRESH: "更新",
         Msg.PAGE_SIZE: "ページサイズ:",
         Msg.PREV: "前へ",
@@ -434,9 +433,6 @@ _TRANSLATIONS: dict[str, dict[Msg, str]] = {
         Msg.DEFAULT: "기본값",
         Msg.ALL: "전체",
         Msg.MORE_GOALS_DISCLAIMER: "목표가 많을수록 생성 시간이 길어집니다.",
-        Msg.ADVANCED: "고급",
-        Msg.USE_DEFAULT_PROMPT: "기본 시스템 프롬프트 사용",
-        Msg.CUSTOM_PROMPT: "사용자 지정 프롬프트:",
         Msg.TEST_CONNECTION: "연결 테스트",
         Msg.SAVE: "저장",
         Msg.CANCEL: "취소",
@@ -449,6 +445,8 @@ _TRANSLATIONS: dict[str, dict[Msg, str]] = {
         Msg.RESTART_TO_APPLY_LANGUAGE: "새 인터페이스 언어를 적용하려면 Grammar AI를 다시 시작하세요.",
         Msg.RESTART_NOW: "지금 다시 시작",
         Msg.RESTART_LATER: "나중에 다시 시작",
+        Msg.CONTEXT: "컨텍스트:",
+        Msg.CONTEXT_TOOLTIP: "텍스트의 도메인이나 상황을 설명하세요\n(예: '고객 지원', '기술 문서', '영업 이메일').\nLLM은 다듬기 시 이 컨텍스트를 엄격히 따릅니다.",
         Msg.REFRESH: "새로 고침",
         Msg.PAGE_SIZE: "페이지 크기:",
         Msg.PREV: "이전",

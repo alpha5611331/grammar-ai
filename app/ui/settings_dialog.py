@@ -87,25 +87,25 @@ class SettingsDialog(tk.Toplevel):
         f.pack(fill="both", expand=True)
 
         ttk.Label(f, text=t(Msg.BASE_URL)).grid(row=0, column=0, sticky="w", **pad)  # type:ignore
-        self._url = ttk.Entry(f, width=44)
+        self._url = ttk.Entry(f, width=32)
         self._url.grid(row=0, column=1, sticky="ew", **pad)  # type: ignore
 
         ttk.Label(f, text=t(Msg.MODEL)).grid(row=1, column=0, sticky="w", **pad)  # type: ignore
-        self._model = ttk.Entry(f, width=44)
+        self._model = ttk.Entry(f, width=32)
         self._model.grid(row=1, column=1, sticky="ew", **pad)  # type: ignore
 
         ttk.Label(f, text=t(Msg.API_KEY)).grid(row=2, column=0, sticky="w", **pad)  # type: ignore
-        self._key = ttk.Entry(f, width=44, show="*")
+        self._key = ttk.Entry(f, width=32, show="*")
         self._key.grid(row=2, column=1, sticky="ew", **pad)  # type: ignore
 
         ttk.Label(f, text=t(Msg.OUTPUT_LANGUAGE)).grid(row=3, column=0, sticky="w", **pad)  # type: ignore
-        self._language = ttk.Combobox(f, width=42, values=list(OUTPUT_LANGUAGES.keys()))
+        self._language = ttk.Combobox(f, width=30, values=list(OUTPUT_LANGUAGES.keys()))
         self._language.grid(row=3, column=1, sticky="ew", **pad)  # type: ignore
         self._tooltips_misc = _Tooltip(self._language, t(Msg.OUTPUT_LANGUAGE_TOOLTIP))
 
         ttk.Label(f, text=t(Msg.INTERFACE_LANGUAGE)).grid(row=4, column=0, sticky="w", **pad)  # type: ignore
         self._ui_language = ttk.Combobox(
-            f, width=42, values=list(UI_LANGUAGES.keys()), state="readonly"
+            f, width=30, values=list(UI_LANGUAGES.keys()), state="readonly"
         )
         self._ui_language.grid(row=4, column=1, sticky="ew", **pad)  # type: ignore
 
@@ -156,38 +156,23 @@ class SettingsDialog(tk.Toplevel):
             font=("", 8, "italic"),
         ).grid(row=disclaimer_row, column=0, columnspan=3, sticky="w", padx=6, pady=(4, 2))
 
-        # Advanced section
-        adv_lf = ttk.LabelFrame(f, text=t(Msg.ADVANCED), padding=(8, 4))
-        adv_lf.grid(row=7, column=0, columnspan=2, sticky="ew", padx=8, pady=(8, 0))
-        adv_lf.columnconfigure(0, weight=1)
+        # Context section
+        ctx_lf = ttk.LabelFrame(f, text=t(Msg.CONTEXT).rstrip(": "), padding=(8, 4))
+        ctx_lf.grid(row=7, column=0, columnspan=2, sticky="ew", padx=8, pady=(8, 0))
+        ctx_lf.columnconfigure(0, weight=1)
 
-        self._use_default_prompt_var = tk.BooleanVar(value=True)
-        cb_default_prompt = ttk.Checkbutton(
-            adv_lf,
-            text=t(Msg.USE_DEFAULT_PROMPT),
-            variable=self._use_default_prompt_var,
-            command=self._toggle_custom_prompt,
-        )
-        cb_default_prompt.grid(row=0, column=0, sticky="w", pady=(0, 4))
+        ctx_text_frame = ttk.Frame(ctx_lf)
+        ctx_text_frame.grid(row=0, column=0, sticky="ew")
+        ctx_text_frame.columnconfigure(0, weight=1)
 
-        self._custom_prompt_frame = ttk.Frame(adv_lf)
+        self._context_text = tk.Text(ctx_text_frame, height=3, width=32, font=("", 9), wrap="word")
+        ctx_scroll = ttk.Scrollbar(ctx_text_frame, orient="vertical", command=self._context_text.yview)
+        self._context_text.configure(yscrollcommand=ctx_scroll.set)
+        self._context_text.grid(row=0, column=0, sticky="ew")
+        ctx_scroll.grid(row=0, column=1, sticky="ns")
+        _Tooltip(self._context_text, t(Msg.CONTEXT_TOOLTIP))
 
-        ttk.Label(self._custom_prompt_frame, text=t(Msg.CUSTOM_PROMPT)).pack(anchor="w")
-        text_frame = ttk.Frame(self._custom_prompt_frame)
-        text_frame.pack(fill="both", expand=True, pady=(2, 0))
-
-        self._custom_prompt_text = tk.Text(
-            text_frame, height=5, width=44, font=("", 9), wrap="word"
-        )
-        scroll = ttk.Scrollbar(
-            text_frame, orient="vertical", command=self._custom_prompt_text.yview
-        )
-        self._custom_prompt_text.configure(yscrollcommand=scroll.set)
-
-        self._custom_prompt_text.pack(side="left", fill="both", expand=True)
-        scroll.pack(side="right", fill="y")
-
-        self._status = ttk.Label(f, text="", foreground="gray", font=("", 8), wraplength=400)
+        self._status = ttk.Label(f, text="", foreground="gray", font=("", 8), wraplength=300)
         self._status.grid(row=8, column=0, columnspan=2, sticky="w", padx=8, pady=2)
 
         btn_row = ttk.Frame(f)
@@ -197,20 +182,6 @@ class SettingsDialog(tk.Toplevel):
         ttk.Button(btn_row, text=t(Msg.CANCEL), command=self.destroy).pack(side="left", padx=4)
 
         f.columnconfigure(1, weight=1)
-
-    def _toggle_custom_prompt(self) -> None:
-        if self._use_default_prompt_var.get():
-            self._custom_prompt_frame.grid_remove()
-        else:
-            self._custom_prompt_frame.grid(row=1, column=0, sticky="ew", pady=(0, 4))
-
-        # Force the window to recalculate its minimum size based on current content
-        self.update_idletasks()
-
-        new_width = self.winfo_reqwidth()
-        new_height = self.winfo_reqheight()
-
-        self.geometry(f"{new_width}x{new_height}")
 
     def _load(self, config: LLMConfig) -> None:
         self._url.delete(0, "end")
@@ -228,11 +199,9 @@ class SettingsDialog(tk.Toplevel):
         code_to_label = {code: label for label, code in UI_LANGUAGES.items()}
         self._ui_language.set(code_to_label.get(self._initial_ui_lang, "English"))
 
-        self._use_default_prompt_var.set(config.use_default_prompt)
-        self._custom_prompt_text.delete("1.0", "end")
-        if config.custom_prompt:
-            self._custom_prompt_text.insert("1.0", config.custom_prompt)
-        self._toggle_custom_prompt()
+        self._context_text.delete("1.0", "end")
+        if config.context:
+            self._context_text.insert("1.0", config.context)
 
     def _current(self) -> LLMConfig:
         # Map the friendly label back to the plain language value sent to the model;
@@ -244,8 +213,7 @@ class SettingsDialog(tk.Toplevel):
             model=self._model.get().strip(),
             api_key=self._key.get().strip(),
             output_language=output_language,
-            use_default_prompt=self._use_default_prompt_var.get(),
-            custom_prompt=self._custom_prompt_text.get("1.0", "end-1c").strip(),
+            context=self._context_text.get("1.0", "end-1c").strip(),
         )
 
     def _set_goals(self, preset: list[Goal]) -> None:
