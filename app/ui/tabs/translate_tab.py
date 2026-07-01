@@ -12,7 +12,7 @@ from app.db.database import load_config, load_translate_language
 from app.i18n import Msg, t
 
 
-class ReadTab(ttk.Frame):
+class TranslateTab(ttk.Frame):
     def __init__(self, parent: tk.Widget) -> None:
         super().__init__(parent)
         hotkey_desc = "+".join(h.capitalize() for h in TRANSLATE_HOTKEYS)

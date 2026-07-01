@@ -27,11 +27,11 @@ from app.core import updater
 from app.db.database import load_autorun, load_config
 from app.i18n import Msg, t
 from app.schemas.models import AppConfig
-from app.ui.polish_tab import MainTab
 from app.ui.settings_dialog import SettingsDialog
 from app.ui.tabs.history_tab import HistoryTab
+from app.ui.tabs.polish_tab import PolishTab
+from app.ui.tabs.translate_tab import TranslateTab
 from app.ui.tooltip import Tooltip
-from app.ui.translate_tab import ReadTab
 
 _NUITKA_COMPILED: bool = "__compiled__" in globals()
 
@@ -98,8 +98,8 @@ class MainWindow(tk.Tk):
         self._nb = ttk.Notebook(self)
         self._nb.pack(fill="both", expand=True, padx=4, pady=4)
 
-        self._main_tab = MainTab(self._nb)
-        self._read_tab = ReadTab(self._nb)
+        self._main_tab = PolishTab(self._nb)
+        self._read_tab = TranslateTab(self._nb)
         self._history_tab = HistoryTab(self._nb)
 
         self._nb.add(self._main_tab, text=f"  {t(Msg.POLISH)}  ")

@@ -98,7 +98,7 @@ class _PolishedItem(ttk.Frame):
         self.after(1500, lambda: self._copy_btn.config(text=t(Msg.COPY)))
 
 
-class MainTab(ttk.Frame):
+class PolishTab(ttk.Frame):
     def __init__(self, parent: tk.Widget) -> None:
         super().__init__(parent)
         self._config: AppConfig = load_config()
