@@ -18,10 +18,12 @@ from app.core.llm import check_connection
 from app.db.database import (
     load_autorun,
     load_selected_goals,
+    load_translate_language,
     load_ui_language,
     save_autorun,
     save_config,
     save_selected_goals,
+    save_translate_language,
     save_ui_language,
 )
 from app.i18n import Msg, goal_description, goal_name, t
@@ -103,20 +105,26 @@ class SettingsDialog(tk.Toplevel):
         self._language.grid(row=3, column=1, sticky="ew", **pad)  # type: ignore
         self._tooltips_misc = _Tooltip(self._language, t(Msg.OUTPUT_LANGUAGE_TOOLTIP))
 
-        ttk.Label(f, text=t(Msg.INTERFACE_LANGUAGE)).grid(row=4, column=0, sticky="w", **pad)  # type: ignore
+        ttk.Label(f, text=t(Msg.TARGET_LANGUAGE)).grid(row=4, column=0, sticky="w", **pad)  # type: ignore
+        self._translate_language = ttk.Combobox(
+            f, width=30, values=list(OUTPUT_LANGUAGES.keys()), state="readonly"
+        )
+        self._translate_language.grid(row=4, column=1, sticky="ew", **pad)  # type: ignore
+
+        ttk.Label(f, text=t(Msg.INTERFACE_LANGUAGE)).grid(row=5, column=0, sticky="w", **pad)  # type: ignore
         self._ui_language = ttk.Combobox(
             f, width=30, values=list(UI_LANGUAGES.keys()), state="readonly"
         )
-        self._ui_language.grid(row=4, column=1, sticky="ew", **pad)  # type: ignore
+        self._ui_language.grid(row=5, column=1, sticky="ew", **pad)  # type: ignore
 
         self._autorun_var = tk.BooleanVar(value=load_autorun())
         ttk.Checkbutton(f, text=t(Msg.RUN_AT_STARTUP), variable=self._autorun_var).grid(
-            row=5, column=0, columnspan=2, sticky="w", padx=8, pady=4
+            row=6, column=0, columnspan=2, sticky="w", padx=8, pady=4
         )
 
         # Goal selection
         goals_lf = ttk.LabelFrame(f, text=t(Msg.GOALS_TO_GENERATE), padding=(8, 4))
-        goals_lf.grid(row=6, column=0, columnspan=2, sticky="ew", padx=8, pady=(4, 0))
+        goals_lf.grid(row=7, column=0, columnspan=2, sticky="ew", padx=8, pady=(4, 0))
 
         preset_row = ttk.Frame(goals_lf)
         preset_row.grid(row=0, column=0, columnspan=3, sticky="w", pady=(0, 4))
@@ -158,7 +166,7 @@ class SettingsDialog(tk.Toplevel):
 
         # Context section
         ctx_lf = ttk.LabelFrame(f, text=t(Msg.CONTEXT).rstrip(": "), padding=(8, 4))
-        ctx_lf.grid(row=7, column=0, columnspan=2, sticky="ew", padx=8, pady=(8, 0))
+        ctx_lf.grid(row=8, column=0, columnspan=2, sticky="ew", padx=8, pady=(8, 0))
         ctx_lf.columnconfigure(0, weight=1)
 
         ctx_text_frame = ttk.Frame(ctx_lf)
@@ -175,10 +183,10 @@ class SettingsDialog(tk.Toplevel):
         _Tooltip(self._context_text, t(Msg.CONTEXT_TOOLTIP))
 
         self._status_label = ttk.Label(f, text="", font=("", 8))
-        self._status_label.grid(row=8, column=0, columnspan=2, sticky="w", padx=8, pady=(2, 0))
+        self._status_label.grid(row=9, column=0, columnspan=2, sticky="w", padx=8, pady=(2, 0))
 
         self._status_frame = ttk.Frame(f)
-        self._status_frame.grid(row=9, column=0, columnspan=2, sticky="ew", padx=8, pady=(2, 0))
+        self._status_frame.grid(row=10, column=0, columnspan=2, sticky="ew", padx=8, pady=(2, 0))
         self._status_frame.columnconfigure(0, weight=1)
         self._status_box = tk.Text(
             self._status_frame,
@@ -199,7 +207,7 @@ class SettingsDialog(tk.Toplevel):
         self._status_frame.grid_remove()
 
         btn_row = ttk.Frame(f)
-        btn_row.grid(row=10, column=0, columnspan=2, pady=(8, 0))
+        btn_row.grid(row=11, column=0, columnspan=2, pady=(8, 0))
         self._test_btn = ttk.Button(btn_row, text=t(Msg.TEST_CONNECTION), command=self._test)
         self._test_btn.pack(side="left", padx=4)
         ttk.Button(btn_row, text=t(Msg.SAVE), command=self._save).pack(side="left", padx=4)
@@ -218,6 +226,8 @@ class SettingsDialog(tk.Toplevel):
         value = config.output_language or "English"
         out_label = {v: k for k, v in OUTPUT_LANGUAGES.items()}
         self._language.set(out_label.get(value, value))
+
+        self._translate_language.set(load_translate_language())
 
         self._initial_ui_lang = load_ui_language()
         code_to_label = {code: label for label, code in UI_LANGUAGES.items()}
@@ -297,6 +307,7 @@ class SettingsDialog(tk.Toplevel):
 
         save_config(cfg)
         save_selected_goals(goals)
+        save_translate_language(self._translate_language.get())
         self._on_save(cfg)
 
         autorun = self._autorun_var.get()
