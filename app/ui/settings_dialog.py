@@ -100,12 +100,12 @@ class SettingsDialog(tk.Toplevel):
         self._key = ttk.Entry(f, width=32, show="*")
         self._key.grid(row=2, column=1, sticky="ew", **pad)  # type: ignore
 
-        ttk.Label(f, text=t(Msg.OUTPUT_LANGUAGE)).grid(row=3, column=0, sticky="w", **pad)  # type: ignore
+        ttk.Label(f, text=t(Msg.POLISH_LANGUAGE)).grid(row=3, column=0, sticky="w", **pad)  # type: ignore
         self._language = ttk.Combobox(f, width=30, values=list(OUTPUT_LANGUAGES.keys()))
         self._language.grid(row=3, column=1, sticky="ew", **pad)  # type: ignore
         self._tooltips_misc = _Tooltip(self._language, t(Msg.OUTPUT_LANGUAGE_TOOLTIP))
 
-        ttk.Label(f, text=t(Msg.TARGET_LANGUAGE)).grid(row=4, column=0, sticky="w", **pad)  # type: ignore
+        ttk.Label(f, text=t(Msg.TRANSLATE_LANGUAGE)).grid(row=4, column=0, sticky="w", **pad)  # type: ignore
         self._translate_language = ttk.Combobox(
             f, width=30, values=list(OUTPUT_LANGUAGES.keys()), state="readonly"
         )
