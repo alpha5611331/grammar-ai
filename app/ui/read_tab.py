@@ -30,7 +30,6 @@ class ReadTab(ttk.Frame):
         self._build_toolbar()
         self._build_original()
         self._build_action_bar()
-        self._build_status()
         self._build_output()
 
     def _build_toolbar(self) -> None:
@@ -45,14 +44,14 @@ class ReadTab(ttk.Frame):
         self._orig.pack(fill="x")
 
     def _build_action_bar(self) -> None:
-        bar = ttk.Frame(self, padding=(6, 2))
-        bar.pack(fill="x")
+        lang_row = ttk.Frame(self, padding=(6, 2))
+        lang_row.pack(fill="x")
 
-        ttk.Label(bar, text=t(Msg.TARGET_LANGUAGE)).pack(side="left")
+        ttk.Label(lang_row, text=t(Msg.TARGET_LANGUAGE)).pack(side="left")
 
         self._lang_var = tk.StringVar(value=load_translate_language())
         lang_combo = ttk.Combobox(
-            bar,
+            lang_row,
             textvariable=self._lang_var,
             values=list(OUTPUT_LANGUAGES.keys()),
             state="readonly",
@@ -61,24 +60,24 @@ class ReadTab(ttk.Frame):
         lang_combo.pack(side="left", padx=(4, 8))
         lang_combo.bind("<<ComboboxSelected>>", self._on_lang_change)
 
+        btn_row = ttk.Frame(self, padding=(6, 2))
+        btn_row.pack(fill="x")
+
         hotkey = "+".join(h.capitalize() for h in TRANSLATE_HOTKEYS)
         self._translate_btn = ttk.Button(
-            bar,
+            btn_row,
             text=t(Msg.TRANSLATE_ACTION) + f" ({hotkey})",
             command=self._trigger_manual,
         )
         self._translate_btn.pack(side="left", padx=2)
 
-    def _build_status(self) -> None:
-        row = ttk.Frame(self, padding=(8, 0, 8, 2))
-        row.pack(fill="x")
         self._status_var = tk.StringVar(value="")
-        self._status_lbl = ttk.Label(row, textvariable=self._status_var, font=("", 8))
-        self._status_lbl.pack(side="left")
+        self._status_lbl = ttk.Label(btn_row, textvariable=self._status_var, font=("", 8))
+        self._status_lbl.pack(side="left", padx=(6, 0))
 
     def _build_output(self) -> None:
         lf = ttk.LabelFrame(self, text=t(Msg.TRANSLATED_TEXT), padding=4)
-        lf.pack(fill="both", expand=True, padx=6, pady=(0, 4))
+        lf.pack(fill="both", expand=True, padx=6, pady=(6, 4))
 
         self._output = tk.Text(
             lf,
