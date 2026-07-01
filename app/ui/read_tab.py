@@ -53,8 +53,12 @@ class ReadTab(ttk.Frame):
         self._status_lbl = ttk.Label(btn_row, textvariable=self._status_var, font=("", 8))
         self._status_lbl.pack(side="left", padx=(6, 0))
 
+    def _output_title(self) -> str:
+        return t(Msg.TRANSLATED_TEXT) + ": " + load_translate_language()
+
     def _build_output(self) -> None:
-        lf = ttk.LabelFrame(self, text=t(Msg.TRANSLATED_TEXT), padding=4)
+        self._output_lf = ttk.LabelFrame(self, text=self._output_title(), padding=4)
+        lf = self._output_lf
         lf.pack(fill="both", expand=True, padx=6, pady=(6, 4))
 
         self._output = tk.Text(
@@ -158,6 +162,9 @@ class ReadTab(ttk.Frame):
         messagebox.showerror(t(Msg.LLM_ERROR), error_msg, parent=self.winfo_toplevel())
 
     # ------------------------------------------------------------------ helpers
+
+    def refresh_translate_language(self) -> None:
+        self._output_lf.config(text=self._output_title())
 
     def clear_all(self) -> None:
         self._orig.delete("1.0", "end")

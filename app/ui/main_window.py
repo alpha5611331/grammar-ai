@@ -125,6 +125,7 @@ class MainWindow(tk.Tk):
     def _on_config_saved(self, config: AppConfig) -> None:
         self._config = config
         self._main_tab.apply_config(config)
+        self._read_tab.refresh_translate_language()
 
     def _clear_active(self) -> None:
         current = self._nb.select()
