@@ -43,19 +43,27 @@ Rewrite text into one or more **tones**, each generated for several writing **go
 
 Every polished result is saved to **History** for later reference.
 
-### Cross-lingual polishing
-
-Choose an **output language** in Settings and Grammar AI translates any source language into it before polishing.
-
 <div align="center">
 
-<img src="media/cfg-output-langs.png" alt="Output language selection" width="420" />
+<img src="media/feat-polish.png" alt="Polish tab" width="420" />
 
-_Pick from a curated list of output languages - or type any language the model understands._
+_The Polish tab, with several goals generated at once for the chosen tone._
 
 </div>
 
-- The model translates any source language into the selected output language before polishing.
+### Cross-lingual polishing
+
+Choose a **Polish language** in Settings and Grammar AI translates any source language into it before polishing.
+
+<div align="center">
+
+<img src="media/cfg-polish-langs.png" alt="Polish language selection" width="420" />
+
+_Pick from a curated list of languages - or type any language the model understands._
+
+</div>
+
+- The model translates any source language into the selected Polish language before polishing.
 - If you choose **English**, the app polishes text using American English conventions.
 - If you choose another language, the app writes polished text naturally in that language.
 
@@ -66,10 +74,28 @@ _Pick from a curated list of output languages - or type any language the model u
 Need a straight translation without a tone/goal rewrite? The **Translate** tab is a dedicated mode for that, separate from Polish.
 
 1. Enter or paste text on the **Translate** tab, or select text anywhere and press `Ctrl+Alt+Space` to send it there directly.
-2. Pick a **target language** from the dropdown - your choice is remembered independently of the Polish tab's output language.
+2. Pick a **target language** from the dropdown - your choice is remembered independently of the Polish tab's language.
 3. Click **Translate** (or use the hotkey) to get the translated text, then **Copy** it to your clipboard.
 
 Translations are not written to the History log; only Polish results are saved there.
+
+<div align="center">
+
+<img src="media/feat-trans.png" alt="Translate tab" width="420" />
+
+_The Translate tab, for quick, direct translation._
+
+</div>
+
+The **Translate language** can also be set in advance from Settings:
+
+<div align="center">
+
+<img src="media/cfg-ui-translate-langs.png" alt="Translate language selection" width="420" />
+
+_Choose a default target language for the Translate tab._
+
+</div>
 
 ---
 
@@ -81,7 +107,7 @@ The whole interface is localized, so you can use Grammar AI in your own language
 
 <img src="media/cfg-ui-langs.png" alt="Interface language selection" width="420" />
 
-_Switch the interface language independently of the output language._
+_Switch the interface language independently of the Polish and Translate languages._
 
 </div>
 
