@@ -244,6 +244,24 @@ def polish_text(
     return results
 
 
+def translate_text(text: str, target_language: str, config: LLMConfig) -> str:
+    client = _get_client(config)
+    system = (
+        f"You are a professional translator. "
+        f"Translate the text the user provides into {target_language}. "
+        f"Output only the translated text — no explanations, labels, or extra content."
+    )
+    response = _create_chat_completion(
+        client,
+        model=config.model,
+        messages=[
+            {"role": "system", "content": system},
+            {"role": "user", "content": text},
+        ],
+    )
+    return (response.choices[0].message.content or "").strip()
+
+
 def check_connection(config: LLMConfig) -> tuple[bool, str]:
     try:
         _get_client(config).models.list()

@@ -54,6 +54,8 @@ class Msg(StrEnum):
     UPDATE_NOW = "Update Now"
     UPDATE_AVAILABLE = "Update v{version} available"
     MAIN = "Main"
+    WRITE = "Polish"
+    READ = "Read"
     HISTORY = "History"
     OPEN = "Open"
     QUIT = "Quit"
@@ -92,6 +94,14 @@ class Msg(StrEnum):
     RESTART_TO_APPLY_LANGUAGE = "Restart Grammar AI to apply the new interface language."
     RESTART_NOW = "Restart Now"
     RESTART_LATER = "Restart Later"
+
+    # read tab
+    TRANSLATE = "Translate"
+    TRANSLATED_TEXT = "Translated Text"
+    TRANSLATING = "Translating…"
+    TRANSLATION_READY = "Translation ready"
+    ENTER_TEXT_TO_TRANSLATE = "Enter or paste text to translate."
+    TARGET_LANGUAGE = "Target language:"
 
     # history tab
     REFRESH = "Refresh"
@@ -178,6 +188,14 @@ _TRANSLATIONS: dict[str, dict[Msg, str]] = {
         Msg.POLISHED_TEXT: "Texto pulido",
         Msg.HISTORY_ENTRY: "Entrada del historial",
         Msg.ID: "ID",
+        Msg.WRITE: "Pulir",
+        Msg.READ: "Leer",
+        Msg.TRANSLATE: "Traducir",
+        Msg.TRANSLATED_TEXT: "Texto traducido",
+        Msg.TRANSLATING: "Traduciendo…",
+        Msg.TRANSLATION_READY: "Traducción lista",
+        Msg.ENTER_TEXT_TO_TRANSLATE: "Escribe o pega texto para traducir.",
+        Msg.TARGET_LANGUAGE: "Idioma destino:",
     },
     "fr": {
         Msg.CLEAR: "Effacer",
@@ -248,6 +266,14 @@ _TRANSLATIONS: dict[str, dict[Msg, str]] = {
         Msg.POLISHED_TEXT: "Texte peaufiné",
         Msg.HISTORY_ENTRY: "Entrée d'historique",
         Msg.ID: "ID",
+        Msg.WRITE: "Peaufiner",
+        Msg.READ: "Lire",
+        Msg.TRANSLATE: "Traduire",
+        Msg.TRANSLATED_TEXT: "Texte traduit",
+        Msg.TRANSLATING: "Traduction…",
+        Msg.TRANSLATION_READY: "Traduction prête",
+        Msg.ENTER_TEXT_TO_TRANSLATE: "Saisissez ou collez le texte à traduire.",
+        Msg.TARGET_LANGUAGE: "Langue cible :",
     },
     "de": {
         Msg.CLEAR: "Leeren",
@@ -318,6 +344,14 @@ _TRANSLATIONS: dict[str, dict[Msg, str]] = {
         Msg.POLISHED_TEXT: "Verfeinerter Text",
         Msg.HISTORY_ENTRY: "Verlaufseintrag",
         Msg.ID: "ID",
+        Msg.WRITE: "Polieren",
+        Msg.READ: "Lesen",
+        Msg.TRANSLATE: "Übersetzen",
+        Msg.TRANSLATED_TEXT: "Übersetzter Text",
+        Msg.TRANSLATING: "Übersetzen…",
+        Msg.TRANSLATION_READY: "Übersetzung bereit",
+        Msg.ENTER_TEXT_TO_TRANSLATE: "Text zum Übersetzen eingeben oder einfügen.",
+        Msg.TARGET_LANGUAGE: "Zielsprache:",
     },
     "ja": {
         Msg.CLEAR: "クリア",
@@ -388,6 +422,14 @@ _TRANSLATIONS: dict[str, dict[Msg, str]] = {
         Msg.POLISHED_TEXT: "推敲されたテキスト",
         Msg.HISTORY_ENTRY: "履歴エントリ",
         Msg.ID: "ID",
+        Msg.WRITE: "推敲",
+        Msg.READ: "リーディング",
+        Msg.TRANSLATE: "翻訳",
+        Msg.TRANSLATED_TEXT: "翻訳テキスト",
+        Msg.TRANSLATING: "翻訳中…",
+        Msg.TRANSLATION_READY: "翻訳完了",
+        Msg.ENTER_TEXT_TO_TRANSLATE: "翻訳するテキストを入力または貼り付けてください。",
+        Msg.TARGET_LANGUAGE: "翻訳先言語:",
     },
     "ko": {
         Msg.CLEAR: "지우기",
@@ -458,6 +500,14 @@ _TRANSLATIONS: dict[str, dict[Msg, str]] = {
         Msg.POLISHED_TEXT: "다듬어진 텍스트",
         Msg.HISTORY_ENTRY: "기록 항목",
         Msg.ID: "ID",
+        Msg.WRITE: "다듬기",
+        Msg.READ: "읽기",
+        Msg.TRANSLATE: "번역",
+        Msg.TRANSLATED_TEXT: "번역된 텍스트",
+        Msg.TRANSLATING: "번역 중…",
+        Msg.TRANSLATION_READY: "번역 완료",
+        Msg.ENTER_TEXT_TO_TRANSLATE: "번역할 텍스트를 입력하거나 붙여넣으세요.",
+        Msg.TARGET_LANGUAGE: "대상 언어:",
     },
 }
 

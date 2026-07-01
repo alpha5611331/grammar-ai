@@ -196,7 +196,8 @@ class SettingsDialog(tk.Toplevel):
 
         btn_row = ttk.Frame(f)
         btn_row.grid(row=10, column=0, columnspan=2, pady=(8, 0))
-        ttk.Button(btn_row, text=t(Msg.TEST_CONNECTION), command=self._test).pack(side="left", padx=4)
+        self._test_btn = ttk.Button(btn_row, text=t(Msg.TEST_CONNECTION), command=self._test)
+        self._test_btn.pack(side="left", padx=4)
         ttk.Button(btn_row, text=t(Msg.SAVE), command=self._save).pack(side="left", padx=4)
         ttk.Button(btn_row, text=t(Msg.CANCEL), command=self.destroy).pack(side="left", padx=4)
 
@@ -255,15 +256,24 @@ class SettingsDialog(tk.Toplevel):
             self._status_box.configure(state="disabled")
             self._status_frame.grid()
         else:
+            self._status_box.configure(state="normal")
+            self._status_box.delete("1.0", "end")
+            self._status_box.configure(state="disabled")
             self._status_frame.grid_remove()
         self.update()
         self.geometry(f"{self.winfo_width()}x{self.winfo_reqheight()}")
 
     def _test(self) -> None:
+        self._test_btn.configure(state="disabled")
         self._set_status(t(Msg.TESTING), "gray")
         ok, msg = check_connection(self._current())
-        self._set_status(msg, "green" if ok else "red")
-        logger.info(f"Config test result: {ok} - {msg}")
+        if not self.winfo_exists():
+            return
+        try:
+            self._set_status(msg, "green" if ok else "red")
+            logger.info(f"Config test result: {ok} - {msg}")
+        finally:
+            self._test_btn.configure(state="normal")
 
     def _save(self) -> None:
         cfg = self._current()

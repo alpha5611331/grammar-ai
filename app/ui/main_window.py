@@ -28,6 +28,7 @@ from app.db.database import load_autorun
 from app.i18n import Msg, t
 from app.ui.history_tab import HistoryTab
 from app.ui.main_tab import MainTab
+from app.ui.read_tab import ReadTab
 
 _NUITKA_COMPILED: bool = "__compiled__" in globals()
 
@@ -94,9 +95,11 @@ class MainWindow(tk.Tk):
         self._nb.pack(fill="both", expand=True, padx=4, pady=4)
 
         self._main_tab = MainTab(self._nb, on_autorun_change=self.apply_autorun)
+        self._read_tab = ReadTab(self._nb)
         self._history_tab = HistoryTab(self._nb)
 
-        self._nb.add(self._main_tab, text=f"  {t(Msg.MAIN)}  ")
+        self._nb.add(self._main_tab, text=f"  {t(Msg.WRITE)}  ")
+        self._nb.add(self._read_tab, text=f"  {t(Msg.READ)}  ")
         self._nb.add(self._history_tab, text=f"  {t(Msg.HISTORY)}  ")
         self._nb.bind("<<NotebookTabChanged>>", self._on_tab_change)
 
@@ -175,6 +178,7 @@ class MainWindow(tk.Tk):
             except Exception as e:
                 logger.debug(f"Tray stop error in _quit: {e}")
         self._main_tab.cleanup()
+        self._read_tab.cleanup()
         self.destroy()
 
     # ------------------------------------------------------------------ update
