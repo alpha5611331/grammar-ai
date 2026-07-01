@@ -55,7 +55,7 @@ class Msg(StrEnum):
     UPDATE_AVAILABLE = "Update v{version} available"
     MAIN = "Main"
     WRITE = "Polish"
-    READ = "Read"
+    READ = "Translate"
     HISTORY = "History"
     OPEN = "Open"
     QUIT = "Quit"
@@ -189,7 +189,7 @@ _TRANSLATIONS: dict[str, dict[Msg, str]] = {
         Msg.HISTORY_ENTRY: "Entrada del historial",
         Msg.ID: "ID",
         Msg.WRITE: "Pulir",
-        Msg.READ: "Leer",
+        Msg.READ: "Traducir",
         Msg.TRANSLATE: "Traducir",
         Msg.TRANSLATED_TEXT: "Texto traducido",
         Msg.TRANSLATING: "Traduciendo…",
@@ -267,7 +267,7 @@ _TRANSLATIONS: dict[str, dict[Msg, str]] = {
         Msg.HISTORY_ENTRY: "Entrée d'historique",
         Msg.ID: "ID",
         Msg.WRITE: "Peaufiner",
-        Msg.READ: "Lire",
+        Msg.READ: "Traduire",
         Msg.TRANSLATE: "Traduire",
         Msg.TRANSLATED_TEXT: "Texte traduit",
         Msg.TRANSLATING: "Traduction…",
@@ -345,7 +345,7 @@ _TRANSLATIONS: dict[str, dict[Msg, str]] = {
         Msg.HISTORY_ENTRY: "Verlaufseintrag",
         Msg.ID: "ID",
         Msg.WRITE: "Polieren",
-        Msg.READ: "Lesen",
+        Msg.READ: "Übersetzen",
         Msg.TRANSLATE: "Übersetzen",
         Msg.TRANSLATED_TEXT: "Übersetzter Text",
         Msg.TRANSLATING: "Übersetzen…",
@@ -423,7 +423,7 @@ _TRANSLATIONS: dict[str, dict[Msg, str]] = {
         Msg.HISTORY_ENTRY: "履歴エントリ",
         Msg.ID: "ID",
         Msg.WRITE: "推敲",
-        Msg.READ: "リーディング",
+        Msg.READ: "翻訳",
         Msg.TRANSLATE: "翻訳",
         Msg.TRANSLATED_TEXT: "翻訳テキスト",
         Msg.TRANSLATING: "翻訳中…",
@@ -501,7 +501,7 @@ _TRANSLATIONS: dict[str, dict[Msg, str]] = {
         Msg.HISTORY_ENTRY: "기록 항목",
         Msg.ID: "ID",
         Msg.WRITE: "다듬기",
-        Msg.READ: "읽기",
+        Msg.READ: "번역",
         Msg.TRANSLATE: "번역",
         Msg.TRANSLATED_TEXT: "번역된 텍스트",
         Msg.TRANSLATING: "번역 중…",
