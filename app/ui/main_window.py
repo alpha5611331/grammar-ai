@@ -94,12 +94,6 @@ class MainWindow(tk.Tk):
         ).pack(side="right")
         self._update_url = ""
 
-        self._toolbar = ttk.Frame(self, padding=(6, 4, 6, 0))
-        self._toolbar.pack(fill="x")
-        ttk.Button(self._toolbar, text=t(Msg.SETTINGS), command=self._open_settings).pack(
-            side="right", padx=2
-        )
-
         self._nb = ttk.Notebook(self)
         self._nb.pack(fill="both", expand=True, padx=4, pady=4)
 
@@ -111,6 +105,11 @@ class MainWindow(tk.Tk):
         self._nb.add(self._read_tab, text=f"  {t(Msg.TRANSLATE)}  ")
         self._nb.add(self._history_tab, text=f"  {t(Msg.HISTORY)}  ")
         self._nb.bind("<<NotebookTabChanged>>", self._on_tab_change)
+
+        # Floats over the notebook's tab row, top-right, instead of its own row.
+        ttk.Button(
+            self._nb, text="⚙", width=3, command=self._open_settings
+        ).place(in_=self._nb, relx=1.0, x=-3, y=0, anchor="ne")
 
     def _open_settings(self) -> None:
         SettingsDialog(self, self._config, self._on_config_saved, self.apply_autorun)
