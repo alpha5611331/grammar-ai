@@ -27,15 +27,9 @@ class ReadTab(ttk.Frame):
         self._hotkey.enable()
 
     def _build(self) -> None:
-        self._build_toolbar()
         self._build_original()
         self._build_action_bar()
         self._build_output()
-
-    def _build_toolbar(self) -> None:
-        bar = ttk.Frame(self, padding=(6, 4))
-        bar.pack(fill="x")
-        ttk.Button(bar, text=t(Msg.CLEAR), command=self._clear_all).pack(side="left", padx=2)
 
     def _build_original(self) -> None:
         lf = ttk.LabelFrame(self, text=t(Msg.ORIGINAL_TEXT), padding=4)
@@ -165,7 +159,7 @@ class ReadTab(ttk.Frame):
 
     # ------------------------------------------------------------------ helpers
 
-    def _clear_all(self) -> None:
+    def clear_all(self) -> None:
         self._orig.delete("1.0", "end")
         self._set_output("")
         self._set_status("", "gray")

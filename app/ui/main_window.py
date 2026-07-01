@@ -31,6 +31,7 @@ from app.ui.history_tab import HistoryTab
 from app.ui.main_tab import MainTab
 from app.ui.read_tab import ReadTab
 from app.ui.settings_dialog import SettingsDialog
+from app.ui.tooltip import Tooltip
 
 _NUITKA_COMPILED: bool = "__compiled__" in globals()
 
@@ -107,9 +108,16 @@ class MainWindow(tk.Tk):
         self._nb.bind("<<NotebookTabChanged>>", self._on_tab_change)
 
         # Floats over the notebook's tab row, top-right, instead of its own row.
-        ttk.Button(
-            self._nb, text="⚙", width=3, command=self._open_settings
-        ).place(in_=self._nb, relx=1.0, x=-3, y=0, anchor="ne")
+        self._tab_toolbar = ttk.Frame(self._nb)
+        self._clear_btn = ttk.Button(
+            self._tab_toolbar, text="🗑", width=3, command=self._clear_active
+        )
+        self._clear_btn.pack(side="left", padx=(0, 2))
+        Tooltip(self._clear_btn, t(Msg.CLEAR))
+        settings_btn = ttk.Button(self._tab_toolbar, text="⚙", width=3, command=self._open_settings)
+        settings_btn.pack(side="left")
+        Tooltip(settings_btn, t(Msg.SETTINGS))
+        self._tab_toolbar.place(in_=self._nb, relx=1.0, x=-3, y=0, anchor="ne")
 
     def _open_settings(self) -> None:
         SettingsDialog(self, self._config, self._on_config_saved, self.apply_autorun)
@@ -118,10 +126,20 @@ class MainWindow(tk.Tk):
         self._config = config
         self._main_tab.apply_config(config)
 
+    def _clear_active(self) -> None:
+        current = self._nb.select()
+        if current == str(self._main_tab):
+            self._main_tab.clear_all()
+        elif current == str(self._read_tab):
+            self._read_tab.clear_all()
+
     def _on_tab_change(self, event: tk.Event) -> None:  # type: ignore[type-arg]
         nb: ttk.Notebook = event.widget  # type: ignore[assignment]
-        if nb.select() == str(self._history_tab):
+        selected = nb.select()
+        if selected == str(self._history_tab):
             self._history_tab.refresh()
+        can_clear = selected in (str(self._main_tab), str(self._read_tab))
+        self._clear_btn.configure(state="normal" if can_clear else "disabled")
 
     def _remove_maximize_button(self) -> None:
         if sys.platform != "win32":

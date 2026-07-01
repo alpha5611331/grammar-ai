@@ -115,20 +115,14 @@ class MainTab(ttk.Frame):
     # ------------------------------------------------------------------ build
 
     def _build(self) -> None:
-        self._build_toolbar()
         self._build_original()
         self._build_action_bar()
         self._build_status()
         self._build_results()
 
-    def _build_toolbar(self) -> None:
-        bar = ttk.Frame(self, padding=(6, 4))
-        bar.pack(fill="x")
-        ttk.Button(bar, text=t(Msg.CLEAR), command=self._clear_all).pack(side="left", padx=2)
-
     def _build_original(self) -> None:
         lf = ttk.LabelFrame(self, text=t(Msg.ORIGINAL_TEXT), padding=4)
-        lf.pack(fill="x", padx=6, pady=(0, 4))
+        lf.pack(fill="x", padx=6, pady=(6, 4))
 
         self._orig = tk.Text(lf, height=4, wrap="word", font=("", 9))
         self._orig.pack(fill="x")
@@ -404,7 +398,7 @@ class MainTab(ttk.Frame):
                 "gray",
             )
 
-    def _clear_all(self) -> None:
+    def clear_all(self) -> None:
         self._orig.delete("1.0", "end")
         self._update_original_height()
         self._clear_results()

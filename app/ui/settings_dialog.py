@@ -28,37 +28,7 @@ from app.db.database import (
 )
 from app.i18n import Msg, goal_description, goal_name, t
 from app.schemas.models import AppConfig, Goal
-
-
-class _Tooltip:
-    def __init__(self, widget: tk.Widget, text: str) -> None:
-        self._widget = widget
-        self._text = text
-        self._tip: Optional[tk.Toplevel] = None
-        widget.bind("<Enter>", self._show)
-        widget.bind("<Leave>", self._hide)
-
-    def _show(self, _event: tk.Event) -> None:  # type: ignore[type-arg]
-        x = self._widget.winfo_rootx() + 20
-        y = self._widget.winfo_rooty() + self._widget.winfo_height() + 2
-        self._tip = tk.Toplevel(self._widget)
-        self._tip.wm_overrideredirect(True)
-        self._tip.wm_geometry(f"+{x}+{y}")
-        tk.Label(
-            self._tip,
-            text=self._text,
-            background="#ffffe0",
-            relief="solid",
-            borderwidth=1,
-            font=("", 8),
-            padx=4,
-            pady=2,
-        ).pack()
-
-    def _hide(self, _event: tk.Event) -> None:  # type: ignore[type-arg]
-        if self._tip:
-            self._tip.destroy()
-            self._tip = None
+from app.ui.tooltip import Tooltip
 
 
 class SettingsDialog(tk.Toplevel):
@@ -103,7 +73,7 @@ class SettingsDialog(tk.Toplevel):
         ttk.Label(f, text=t(Msg.POLISH_LANGUAGE)).grid(row=3, column=0, sticky="w", **pad)  # type: ignore
         self._language = ttk.Combobox(f, width=30, values=list(OUTPUT_LANGUAGES.keys()))
         self._language.grid(row=3, column=1, sticky="ew", **pad)  # type: ignore
-        self._tooltips_misc = _Tooltip(self._language, t(Msg.OUTPUT_LANGUAGE_TOOLTIP))
+        self._tooltips_misc = Tooltip(self._language, t(Msg.OUTPUT_LANGUAGE_TOOLTIP))
 
         ttk.Label(f, text=t(Msg.TRANSLATE_LANGUAGE)).grid(row=4, column=0, sticky="w", **pad)  # type: ignore
         self._translate_language = ttk.Combobox(
@@ -146,7 +116,7 @@ class SettingsDialog(tk.Toplevel):
 
         saved_goals = load_selected_goals()
         self._goal_vars: dict[Goal, tk.BooleanVar] = {}
-        self._tooltips: list[_Tooltip] = []
+        self._tooltips: list[Tooltip] = []
         for i, goal in enumerate(GOALS):
             var = tk.BooleanVar(value=goal in saved_goals)
             self._goal_vars[goal] = var
@@ -154,7 +124,7 @@ class SettingsDialog(tk.Toplevel):
             cb.grid(row=(i // 3) + 1, column=i % 3, sticky="w", padx=6, pady=2)
             desc = goal_description(goal)
             if desc:
-                self._tooltips.append(_Tooltip(cb, desc))
+                self._tooltips.append(Tooltip(cb, desc))
 
         disclaimer_row = (len(GOALS) - 1) // 3 + 2
         ttk.Label(
@@ -180,7 +150,7 @@ class SettingsDialog(tk.Toplevel):
         self._context_text.configure(yscrollcommand=ctx_scroll.set)
         self._context_text.grid(row=0, column=0, sticky="ew")
         ctx_scroll.grid(row=0, column=1, sticky="ns")
-        _Tooltip(self._context_text, t(Msg.CONTEXT_TOOLTIP))
+        Tooltip(self._context_text, t(Msg.CONTEXT_TOOLTIP))
 
         self._status_label = ttk.Label(f, text="", font=("", 8))
         self._status_label.grid(row=9, column=0, columnspan=2, sticky="w", padx=8, pady=(2, 0))
