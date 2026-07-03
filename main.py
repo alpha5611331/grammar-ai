@@ -1,15 +1,108 @@
 import argparse
+import importlib.metadata
 import sys
+import threading
+import tomllib
 import traceback
+from pathlib import Path
 
 from loguru import logger
 
 from app import i18n
-from app.config import DATA_DIR, ERROR_LOG_PATH, LOG_PATH
+from app.config import APP_NAME, DATA_DIR, ERROR_LOG_PATH, ICON_PATH, LOG_PATH, _frozen_base
 from app.core import single_instance
 from app.core.autorun import configure_autorun
 from app.db.database import init_db, load_autorun, load_ui_language
-from app.ui.main_window import MainWindow
+
+_NUITKA_COMPILED: bool = "__compiled__" in globals()
+_WEB_DIR = Path(__file__).resolve().parent / "app" / "ui" / "webview" / "web"
+
+
+def get_app_version() -> str:
+    if getattr(sys, "frozen", False) or _NUITKA_COMPILED:
+        try:
+            with open(_frozen_base() / "pyproject.toml", "rb") as f:
+                data = tomllib.load(f)
+            return data["project"]["version"]
+        except Exception as e:
+            logger.debug(f"Could not read version from pyproject.toml: {e}")
+            return "dev"
+    try:
+        return importlib.metadata.version("grammar-ai")
+    except importlib.metadata.PackageNotFoundError:
+        pass
+    try:
+        with open(Path(__file__).resolve().parent / "pyproject.toml", "rb") as f:
+            data = tomllib.load(f)
+        return data["project"]["version"]
+    except Exception as e:
+        logger.debug(f"Could not read version from pyproject.toml: {e}")
+        return "dev"
+
+
+def _run_tray(api, window) -> None:
+    import pystray
+    from PIL import Image
+
+    from app.i18n import Msg, t
+
+    def on_open(*_: object) -> None:
+        window.show()
+        window.restore()
+
+    def on_quit(*_: object) -> None:
+        icon.stop()
+        api.quit_app()
+
+    icon_image = Image.open(ICON_PATH).convert("RGBA")
+    menu = pystray.Menu(
+        pystray.MenuItem(t(Msg.OPEN), on_open, default=True),
+        pystray.MenuItem(t(Msg.QUIT), on_quit),
+    )
+    icon = pystray.Icon(APP_NAME, icon_image, APP_NAME, menu)
+    icon.run()
+
+
+def _run_webview(tray_only: bool) -> None:
+    import webview
+
+    from app.ui.webview.api import Api
+
+    api = Api(version=get_app_version())
+    window = webview.create_window(
+        APP_NAME,
+        url=str(_WEB_DIR / "index.html"),
+        js_api=api,
+        width=380,
+        height=680,
+        min_size=(380, 520),
+        resizable=False,
+        hidden=tray_only,
+    )
+    if window is None:
+        raise RuntimeError("pywebview failed to create the main window")
+
+    def _closing() -> bool:
+        if load_autorun():
+            window.hide()
+            return False
+        api.quit_app()
+        return True
+
+    window.events.closing += _closing
+
+    def _on_start() -> None:
+        api.attach_window(window)
+        threading.Thread(target=_run_tray, args=(api, window), daemon=True).start()
+
+    webview.start(_on_start, debug=False)
+
+
+def _run_tkinter(tray_only: bool) -> None:
+    from app.ui.main_window import MainWindow
+
+    app = MainWindow(tray_only=tray_only)
+    app.mainloop()
 
 
 def main() -> None:
@@ -29,13 +122,17 @@ def main() -> None:
 
         parser = argparse.ArgumentParser(add_help=False)
         parser.add_argument("--tray-only", action="store_true")
+        parser.add_argument("--tkinter", action="store_true", help="use the legacy Tkinter UI")
         args, _ = parser.parse_known_args()
 
         init_db()
         i18n.set_language(load_ui_language())
         configure_autorun(load_autorun())
-        app = MainWindow(tray_only=args.tray_only)
-        app.mainloop()
+
+        if args.tkinter:
+            _run_tkinter(args.tray_only)
+        else:
+            _run_webview(args.tray_only)
     except Exception as e:
         error_msg = f"Error starting Grammar AI: {e}\n{traceback.format_exc()}"
         print(error_msg)

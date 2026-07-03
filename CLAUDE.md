@@ -29,14 +29,29 @@ manual (`workflow_dispatch`) job on `windows-latest` that bumps the version, bui
 
 ## Architecture
 
-Grammar AI is a **Windows-only** Python 3.12 + Tkinter desktop utility (not a browser extension,
-despite the `grammar-ai-ext` directory name). Its core interaction model: press a global hotkey
-anywhere in Windows, capture the focused text field's content, send it to an LLM, and paste the
-result back into the same field.
+Grammar AI is a **Windows-only** Python 3.12 desktop utility (not a browser extension, despite the
+`grammar-ai-ext` directory name). Its core interaction model: press a global hotkey anywhere in
+Windows, capture the focused text field's content, send it to an LLM, and paste the result back
+into the same field.
 
 **Entry point**: `main.py` acquires a single-instance lock, initializes the SQLite DB, sets the UI
-language, configures autorun, then constructs `app.ui.main_window.MainWindow` (a `tk.Tk` subclass)
-and runs the Tkinter mainloop.
+language, configures autorun, then launches the UI. Default UI is `pywebview` (an HTML/CSS/JS
+frontend in an embedded WebView2 window, see below); `--tkinter` launches the legacy Tkinter UI
+(`app/ui/main_window.py` and friends) instead. The Tkinter code is being kept temporarily as a
+fallback during the pywebview rollout — once the webview UI is confirmed solid, the Tkinter files
+and the `--tkinter` flag should be removed rather than maintained in parallel long-term.
+
+**`app/ui/webview/`** — the current UI, an HTML/CSS/JS frontend (`web/index.html`, `web/style.css`,
+`web/app.js`) rendered via `pywebview`'s embedded WebView2 window, talking to Python through
+`api.py`'s `Api` class exposed as `pywebview.api` in JS. Business logic (LLM calls, storage, i18n)
+is unchanged from the Tkinter version - `Api` only adapts it to a request/response + push-update
+shape: long-running calls like `polish()`/`translate()` spawn a background thread and push partial
+results into the page via `window.evaluate_js(...)` (mirroring the old `.after(0, ...)` pattern,
+now via `window.onPolishResult(...)`/`onTranslateDone(...)`/etc. globals defined in `app.js`).
+`Api` also owns the two `HotkeyManager` instances (Polish and Translate) directly - hotkey capture
+pushes into the page via `window.onHotkeyCapture(kind, text)` rather than a per-tab widget
+callback. i18n strings are not duplicated in JS: `Api.get_bootstrap()` serializes the full current-
+language string table (all `Msg` members) once at load, and `app.js` renders from that dict.
 
 **`app/core/` — OS integration, all Windows-specific (`ctypes` calls into `user32.dll`/`kernel32.dll`)**:
 - `hotkey.py` — registers global hotkeys via raw Win32 `RegisterHotKey` and captures the focused
@@ -65,11 +80,12 @@ capture or paste-back. `pyperclip` is still used elsewhere for explicit, user-cl
 buttons (`polish_tab.py`, `translate_tab.py`) — that one-shot, user-initiated pattern is fine and
 distinct from the programmatic capture loop that was removed.
 
-**`app/ui/`** — Tkinter widgets. `main_window.py` hosts a `ttk.Notebook` with three tabs
-(`app/ui/tabs/polish_tab.py`, `translate_tab.py`, `history_tab.py`) plus the tray icon (`pystray`)
-and the update banner. Each tab constructs its own `HotkeyManager` and wires the callback back
-into the tab via `.after(0, ...)` for Tkinter thread safety, since hotkey capture happens on a
-background thread.
+**`app/ui/`** (legacy, `--tkinter` only) — Tkinter widgets. `main_window.py` hosts a
+`ttk.Notebook` with three tabs (`app/ui/tabs/polish_tab.py`, `translate_tab.py`, `history_tab.py`)
+plus the tray icon (`pystray`) and the update banner. Each tab constructs its own `HotkeyManager`
+and wires the callback back into the tab via `.after(0, ...)` for Tkinter thread safety. Treat
+this as read-only/reference during the webview transition; new feature work belongs in
+`app/ui/webview/`.
 
 **`app/db/database.py`** — SQLite at `~/.grammar-ai/data.db` (see `app/config.py` for paths).
 Stores settings (including the API key, in plaintext) and Polish history (capped at

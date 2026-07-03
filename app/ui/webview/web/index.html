@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Grammar AI</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="update-bar" class="update-bar hidden">
+    <span id="update-text"></span>
+    <span class="spacer"></span>
+    <button id="update-now-btn" class="btn btn-primary"></button>
+    <button id="update-dismiss-btn" class="btn-icon">&times;</button>
+  </div>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="polish"></button>
+    <button class="tab-btn" data-tab="translate"></button>
+    <button class="tab-btn" data-tab="history"></button>
+    <span class="spacer"></span>
+    <button id="clear-btn" class="btn-icon" title="Clear">&#128465;</button>
+    <button id="settings-btn" class="btn-icon" title="Settings">&#9881;</button>
+  </nav>
+
+  <main>
+    <!-- Polish tab -->
+    <section id="tab-polish" class="tab-panel active">
+      <div class="field-group">
+        <label id="lbl-original-text" class="field-label"></label>
+        <textarea id="polish-original" rows="4"></textarea>
+      </div>
+      <div class="action-bar">
+        <label id="lbl-tone" class="inline-label"></label>
+        <select id="tone-select"></select>
+        <button id="polish-trigger-btn" class="btn"></button>
+      </div>
+      <div id="polish-status" class="status"></div>
+      <div class="results-header">
+        <span id="lbl-polished-versions"></span>
+      </div>
+      <div id="polish-results" class="results-list"></div>
+    </section>
+
+    <!-- Translate tab -->
+    <section id="tab-translate" class="tab-panel">
+      <div class="field-group">
+        <label id="lbl-translate-original" class="field-label"></label>
+        <textarea id="translate-original" rows="5"></textarea>
+      </div>
+      <div class="action-bar">
+        <button id="translate-trigger-btn" class="btn"></button>
+        <span id="translate-status" class="status"></span>
+      </div>
+      <div class="field-group">
+        <label id="lbl-translated-text" class="field-label"></label>
+        <textarea id="translate-output" rows="6" readonly></textarea>
+      </div>
+      <div class="action-bar right">
+        <button id="translate-copy-btn" class="btn" disabled></button>
+      </div>
+    </section>
+
+    <!-- History tab -->
+    <section id="tab-history" class="tab-panel">
+      <div class="action-bar">
+        <button id="history-refresh-btn" class="btn"></button>
+        <button id="history-clear-btn" class="btn"></button>
+      </div>
+      <div class="action-bar">
+        <label id="lbl-page-size" class="inline-label"></label>
+        <select id="history-page-size">
+          <option>10</option>
+          <option selected>50</option>
+          <option>100</option>
+        </select>
+        <button id="history-prev-btn" class="btn-icon">&#8592;</button>
+        <span id="history-page-label"></span>
+        <button id="history-next-btn" class="btn-icon">&#8594;</button>
+      </div>
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th id="th-used-at"></th>
+            <th id="th-tone"></th>
+            <th id="th-goal"></th>
+            <th id="th-polished-text"></th>
+          </tr>
+        </thead>
+        <tbody id="history-body"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <!-- Settings modal -->
+  <div id="settings-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <h2 id="settings-title"></h2>
+      <div class="form-row">
+        <label id="lbl-base-url"></label>
+        <input id="set-base-url" type="text" />
+      </div>
+      <div class="form-row">
+        <label id="lbl-model"></label>
+        <input id="set-model" type="text" />
+      </div>
+      <div class="form-row">
+        <label id="lbl-api-key"></label>
+        <input id="set-api-key" type="password" />
+      </div>
+      <div class="form-row">
+        <label id="lbl-polish-language"></label>
+        <input id="set-output-language" list="output-lang-list" type="text" />
+        <datalist id="output-lang-list"></datalist>
+      </div>
+      <div class="form-row">
+        <label id="lbl-translate-language"></label>
+        <select id="set-translate-language"></select>
+      </div>
+      <div class="form-row">
+        <label id="lbl-interface-language"></label>
+        <select id="set-ui-language"></select>
+      </div>
+      <div class="form-row checkbox-row">
+        <label><input id="set-autorun" type="checkbox" /> <span id="lbl-run-at-startup"></span></label>
+      </div>
+
+      <fieldset class="goals-fieldset">
+        <legend id="lbl-goals-to-generate"></legend>
+        <div class="goal-presets">
+          <button type="button" id="goal-preset-min" class="btn btn-small"></button>
+          <button type="button" id="goal-preset-default" class="btn btn-small"></button>
+          <button type="button" id="goal-preset-all" class="btn btn-small"></button>
+        </div>
+        <div id="goal-checkboxes" class="goal-checkboxes"></div>
+        <p id="lbl-more-goals-disclaimer" class="disclaimer"></p>
+      </fieldset>
+
+      <div class="form-row">
+        <label id="lbl-context"></label>
+        <textarea id="set-context" rows="3"></textarea>
+      </div>
+
+      <div id="settings-status" class="status"></div>
+
+      <div class="modal-actions">
+        <button id="test-connection-btn" class="btn"></button>
+        <button id="settings-save-btn" class="btn btn-primary"></button>
+        <button id="settings-cancel-btn" class="btn"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- History entry detail modal -->
+  <div id="history-detail-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <h2 id="lbl-history-entry"></h2>
+      <div class="detail-meta">
+        <div><strong id="lbl-tone-meta"></strong> <span id="detail-tone"></span></div>
+        <div><strong id="lbl-goal-meta"></strong> <span id="detail-goal"></span></div>
+        <div><strong id="lbl-used-at-meta"></strong> <span id="detail-used-at"></span></div>
+      </div>
+      <hr />
+      <label id="lbl-detail-original" class="field-label"></label>
+      <textarea readonly rows="4" id="detail-original"></textarea>
+      <label id="lbl-detail-polished" class="field-label"></label>
+      <textarea readonly rows="4" id="detail-polished"></textarea>
+      <div class="modal-actions">
+        <button id="detail-close-btn" class="btn"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LLM error modal -->
+  <div id="error-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <h2 id="lbl-llm-error"></h2>
+      <p id="lbl-llm-error-body"></p>
+      <textarea id="error-body" readonly rows="6"></textarea>
+      <div class="modal-actions">
+        <button id="error-open-log-btn" class="btn"></button>
+        <button id="error-close-btn" class="btn"></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
