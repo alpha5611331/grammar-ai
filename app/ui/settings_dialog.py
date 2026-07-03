@@ -13,6 +13,7 @@ from app.config import (
     OUTPUT_LANGUAGES,
     UI_LANGUAGES,
 )
+from app.core import single_instance
 from app.core.autorun import configure_autorun
 from app.core.llm import check_connection
 from app.db.database import (
@@ -346,6 +347,7 @@ class SettingsDialog(tk.Toplevel):
             root.destroy()
         except Exception:
             pass
+        single_instance.release_lock()
         os.execv(sys.executable, [sys.executable, *sys.argv])
 
     def _center(self, parent: tk.Misc) -> None:

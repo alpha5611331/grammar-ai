@@ -213,9 +213,13 @@ class Api:
         return {"ok": ok, "message": message}
 
     def restart_app(self) -> None:
+        # Deliberately does not call self._window.destroy(): that fires pywebview's
+        # `closing` event, which main.py's handler intercepts and turns into a hide
+        # (not a real close) whenever autorun is on - the window would never actually
+        # close and os.execv would replace a process still holding a visible window.
+        # os.execv terminates this process outright, taking the window with it.
         self.shutdown()
-        if self._window is not None:
-            self._window.destroy()
+        single_instance.release_lock()
         os.execv(sys.executable, [sys.executable, *sys.argv])
 
     # ------------------------------------------------------------------ polish
