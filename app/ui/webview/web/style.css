@@ -129,6 +129,22 @@ textarea, input[type="text"], input[type="password"], select {
 .btn-primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
 .btn-small { padding: 3px 8px; font-size: 11px; }
 
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--card-bg);
+  color: var(--fg);
+  cursor: pointer;
+}
+.icon-btn:hover { background: var(--border); }
+.icon-btn:disabled { opacity: 0.4; cursor: default; }
+
 .status { font-size: 11px; min-height: 14px; margin: 4px 0; }
 .status.blue { color: var(--accent); }
 .status.green { color: var(--success); }

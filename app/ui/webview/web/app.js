@@ -15,6 +15,27 @@
     return document.getElementById(id);
   }
 
+  const ICONS = {
+    use: '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7"/></svg>',
+    copy: '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="8" height="8" rx="1.5"/><path d="M3 10V4.5A1.5 1.5 0 0 1 4.5 3H10"/></svg>',
+    check: '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7"/></svg>',
+  };
+
+  function makeIconButton(iconKey, label, extraClass) {
+    const btn = document.createElement("button");
+    btn.className = "icon-btn" + (extraClass ? " " + extraClass : "");
+    btn.innerHTML = ICONS[iconKey];
+    btn.title = label;
+    btn.setAttribute("aria-label", label);
+    return btn;
+  }
+
+  function setIconButtonState(btn, iconKey, label) {
+    btn.innerHTML = ICONS[iconKey];
+    btn.title = label;
+    btn.setAttribute("aria-label", label);
+  }
+
   function setStatus(el, text, color) {
     el.textContent = text || "";
     el.className = "status" + (color ? " " + color : "");
@@ -65,7 +86,7 @@
 
     $("polish-trigger-btn").textContent = fmt(s.TRIGGER, { hotkey: BOOT.polishHotkey });
     $("translate-trigger-btn").textContent = s.TRANSLATE + " (" + BOOT.translateHotkey + ")";
-    $("translate-copy-btn").textContent = s.COPY;
+    setIconButtonState($("translate-copy-btn"), "copy", s.COPY);
     $("history-refresh-btn").textContent = s.REFRESH;
     $("history-clear-btn").textContent = s.CLEAR;
     $("history-prev-btn").title = s.PREV;
@@ -199,12 +220,8 @@
     spacer.className = "spacer";
     header.appendChild(spacer);
 
-    const useBtn = document.createElement("button");
-    useBtn.className = "btn btn-small";
-    useBtn.textContent = BOOT.strings.USE;
-    const copyBtn = document.createElement("button");
-    copyBtn.className = "btn btn-small";
-    copyBtn.textContent = BOOT.strings.COPY;
+    const useBtn = makeIconButton("use", BOOT.strings.USE);
+    const copyBtn = makeIconButton("copy", BOOT.strings.COPY);
 
     header.appendChild(useBtn);
     header.appendChild(copyBtn);
@@ -233,8 +250,8 @@
         goal: goalMeta ? goalMeta.label : result.goal,
       });
       setStatus($("polish-status"), label, "green");
-      copyBtn.textContent = BOOT.strings.COPIED_EXCL;
-      setTimeout(() => (copyBtn.textContent = BOOT.strings.COPY), 1500);
+      setIconButtonState(copyBtn, "check", BOOT.strings.COPIED_EXCL);
+      setTimeout(() => setIconButtonState(copyBtn, "copy", BOOT.strings.COPY), 1500);
     });
 
     // Keep result cards ordered the same way GOALS is ordered.
@@ -269,8 +286,8 @@
       if (!text) return;
       await pywebview.api.copy_text(text);
       const btn = $("translate-copy-btn");
-      btn.textContent = BOOT.strings.COPIED_EXCL;
-      setTimeout(() => (btn.textContent = BOOT.strings.COPY), 1500);
+      setIconButtonState(btn, "check", BOOT.strings.COPIED_EXCL);
+      setTimeout(() => setIconButtonState(btn, "copy", BOOT.strings.COPY), 1500);
     });
   }
 
