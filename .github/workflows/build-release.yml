@@ -49,6 +49,9 @@ jobs:
         $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
         & $iscc /DAppVersion="${{ steps.bump_version.outputs.new_version }}" installer.iss
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        # Not yet code-signed. An unsigned exe/installer is a common AV/SmartScreen
+        # false-positive trigger; signing with an Authenticode cert (stored as a CI
+        # secret) here would be the next step if that becomes a problem in practice.
 
     # Commit and tag only after both build steps succeed.
     # This keeps the repo clean: a failed build leaves no orphaned version bump.
