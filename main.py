@@ -88,7 +88,11 @@ def _run_webview(tray_only: bool) -> None:
         if load_autorun():
             window.hide()
             return False
-        api.quit_app()
+        # Don't call api.quit_app() here: it calls window.destroy(), and we're
+        # already inside the closing callback that a destroy() call triggered -
+        # calling destroy() again while one is in progress is a reentrancy hazard.
+        # Returning True lets the in-progress destroy complete on its own.
+        api.shutdown()
         return True
 
     window.events.closing += _closing

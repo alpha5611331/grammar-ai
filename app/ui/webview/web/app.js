@@ -105,6 +105,7 @@
     $("set-output-language").title = s.OUTPUT_LANGUAGE_TOOLTIP;
     $("set-context").title = s.CONTEXT_TOOLTIP;
     document.title = BOOT.appName;
+    $("titlebar-title").textContent = BOOT.appName;
   }
 
   // ------------------------------------------------------------------ tabs
@@ -170,7 +171,7 @@
     $("polish-trigger-btn").addEventListener("click", () => {
       const text = $("polish-original").value.trim();
       if (!text) {
-        alert(BOOT.strings.EMPTY + "\n\n" + BOOT.strings.ENTER_OR_PASTE);
+        showAlert(BOOT.strings.EMPTY + "\n\n" + BOOT.strings.ENTER_OR_PASTE);
         return;
       }
       runPolish(text);
@@ -179,7 +180,7 @@
 
   function runPolish(text) {
     if (!BOOT.config.api_key) {
-      alert(BOOT.strings.NO_API_KEY + "\n\n" + BOOT.strings.CONFIGURE_API_KEY);
+      showAlert(BOOT.strings.NO_API_KEY + "\n\n" + BOOT.strings.CONFIGURE_API_KEY);
       return;
     }
     lastPolishOriginal = text;
@@ -272,7 +273,7 @@
         goal: goalMeta ? goalMeta.label : result.goal,
       });
       setStatus($("polish-status"), label, res.pasted ? "green" : "gray");
-      pywebview.api.close_window();
+      setTimeout(() => pywebview.api.hide_to_tray(), 400);
     });
 
     copyBtn.addEventListener("click", async () => {
@@ -329,7 +330,7 @@
     $("translate-trigger-btn").addEventListener("click", () => {
       const text = $("translate-original").value.trim();
       if (!text) {
-        alert(BOOT.strings.EMPTY + "\n\n" + BOOT.strings.ENTER_TEXT_TO_TRANSLATE);
+        showAlert(BOOT.strings.EMPTY + "\n\n" + BOOT.strings.ENTER_TEXT_TO_TRANSLATE);
         return;
       }
       runTranslate(text);
@@ -346,7 +347,7 @@
 
   function runTranslate(text) {
     if (!BOOT.config.api_key) {
-      alert(BOOT.strings.NO_API_KEY + "\n\n" + BOOT.strings.CONFIGURE_API_KEY);
+      showAlert(BOOT.strings.NO_API_KEY + "\n\n" + BOOT.strings.CONFIGURE_API_KEY);
       return;
     }
     lastTranslateOriginal = text;
@@ -367,7 +368,7 @@
   window.onTranslateError = (error) => {
     setStatus($("translate-status"), BOOT.strings.ERROR, "red");
     $("translate-trigger-btn").disabled = false;
-    alert(BOOT.strings.LLM_ERROR + "\n\n" + error);
+    showError(error);
   };
 
   function clearTranslate() {
@@ -552,7 +553,7 @@
     const payload = collectSettingsPayload();
     const res = await pywebview.api.save_settings(payload);
     if (!res.ok) {
-      alert(res.error);
+      showAlert(res.error);
       return;
     }
     BOOT.config.base_url = payload.baseUrl;
@@ -563,7 +564,7 @@
     BOOT.selectedGoals = payload.goals;
     applyStrings();
     closeSettings();
-    if (res.restartRequired && confirm(BOOT.strings.RESTART_TO_APPLY_LANGUAGE)) {
+    if (res.restartRequired && (await showConfirm(BOOT.strings.RESTART_TO_APPLY_LANGUAGE, BOOT.strings.RESTART_NOW, BOOT.strings.RESTART_LATER))) {
       pywebview.api.restart_app();
     }
   }
@@ -577,6 +578,50 @@
     $("update-dismiss-btn").onclick = () => $("update-bar").classList.add("hidden");
     $("update-bar").classList.remove("hidden");
   };
+
+  // ------------------------------------------------------------------ dialogs
+
+  function showAlert(message) {
+    return showGenericDialog(message, { okLabel: BOOT.strings.CLOSE, showCancel: false });
+  }
+
+  function showConfirm(message, okLabel, cancelLabel) {
+    return showGenericDialog(message, {
+      okLabel: okLabel || BOOT.strings.CLOSE,
+      cancelLabel: cancelLabel || BOOT.strings.CANCEL,
+      showCancel: true,
+    });
+  }
+
+  function showGenericDialog(message, { okLabel, cancelLabel, showCancel }) {
+    return new Promise((resolve) => {
+      const modal = $("generic-dialog-modal");
+      const okBtn = $("generic-dialog-ok-btn");
+      const cancelBtn = $("generic-dialog-cancel-btn");
+
+      $("generic-dialog-message").textContent = message;
+      okBtn.textContent = okLabel;
+      cancelBtn.textContent = cancelLabel || "";
+      cancelBtn.classList.toggle("hidden", !showCancel);
+      modal.classList.remove("hidden");
+
+      const cleanup = () => {
+        modal.classList.add("hidden");
+        okBtn.removeEventListener("click", onOk);
+        cancelBtn.removeEventListener("click", onCancel);
+      };
+      const onOk = () => {
+        cleanup();
+        resolve(true);
+      };
+      const onCancel = () => {
+        cleanup();
+        resolve(false);
+      };
+      okBtn.addEventListener("click", onOk);
+      cancelBtn.addEventListener("click", onCancel);
+    });
+  }
 
   // ------------------------------------------------------------------ errors
 

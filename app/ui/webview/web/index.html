@@ -7,6 +7,7 @@
 </head>
 <body>
   <div class="titlebar pywebview-drag-region">
+    <span id="titlebar-title" class="titlebar-title"></span>
     <span class="spacer"></span>
     <button id="window-close-btn" class="btn-icon" title="Close">&times;</button>
   </div>
@@ -184,6 +185,17 @@
       <div class="modal-actions">
         <button id="error-open-log-btn" class="btn"></button>
         <button id="error-close-btn" class="btn"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Generic alert/confirm modal -->
+  <div id="generic-dialog-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <p id="generic-dialog-message" class="dialog-message"></p>
+      <div class="modal-actions">
+        <button id="generic-dialog-cancel-btn" class="btn hidden"></button>
+        <button id="generic-dialog-ok-btn" class="btn btn-primary"></button>
       </div>
     </div>
   </div>
