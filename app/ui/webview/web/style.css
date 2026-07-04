@@ -38,6 +38,16 @@ body { display: flex; flex-direction: column; }
 .hidden { display: none !important; }
 .spacer { flex: 1 1 auto; }
 
+.titlebar {
+  display: flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 4px;
+  flex: 0 0 auto;
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border);
+}
+
 .update-bar {
   display: flex;
   align-items: center;
@@ -115,6 +125,13 @@ textarea, input[type="text"], input[type="password"], select {
 
 .inline-label { font-size: 12px; color: var(--muted); white-space: nowrap; }
 
+#tone-select {
+  width: auto;
+  max-width: 130px;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
 .btn {
   padding: 5px 10px;
   border: 1px solid var(--border);
@@ -123,6 +140,8 @@ textarea, input[type="text"], input[type="password"], select {
   color: var(--fg);
   cursor: pointer;
   font-size: 12px;
+  white-space: nowrap;
+  flex: 0 0 auto;
 }
 .btn:hover { background: var(--border); }
 .btn:disabled { opacity: 0.5; cursor: default; }
@@ -167,6 +186,14 @@ textarea, input[type="text"], input[type="password"], select {
   margin-bottom: 4px;
 }
 .result-card .goal-badge { font-weight: 600; font-size: 11px; }
+.result-card .shortcut-hint {
+  font-size: 10px;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0 4px;
+  line-height: 1.5;
+}
 .result-card textarea { border: none; padding: 0; background: transparent; }
 
 .history-table { width: 100%; border-collapse: collapse; font-size: 11px; }

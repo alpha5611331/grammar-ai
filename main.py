@@ -74,10 +74,12 @@ def _run_webview(tray_only: bool) -> None:
         url=str(_WEB_DIR / "index.html"),
         js_api=api,
         width=380,
-        height=680,
-        min_size=(380, 520),
+        height=708,
+        min_size=(380, 548),
         resizable=False,
         hidden=tray_only,
+        frameless=True,
+        easy_drag=False,
     )
     if window is None:
         raise RuntimeError("pywebview failed to create the main window")
@@ -98,13 +100,6 @@ def _run_webview(tray_only: bool) -> None:
     webview.start(_on_start, debug=False)
 
 
-def _run_tkinter(tray_only: bool) -> None:
-    from app.ui.main_window import MainWindow
-
-    app = MainWindow(tray_only=tray_only)
-    app.mainloop()
-
-
 def main() -> None:
     try:
         logger.remove()
@@ -122,17 +117,13 @@ def main() -> None:
 
         parser = argparse.ArgumentParser(add_help=False)
         parser.add_argument("--tray-only", action="store_true")
-        parser.add_argument("--tkinter", action="store_true", help="use the legacy Tkinter UI")
         args, _ = parser.parse_known_args()
 
         init_db()
         i18n.set_language(load_ui_language())
         configure_autorun(load_autorun())
 
-        if args.tkinter:
-            _run_tkinter(args.tray_only)
-        else:
-            _run_webview(args.tray_only)
+        _run_webview(args.tray_only)
     except Exception as e:
         error_msg = f"Error starting Grammar AI: {e}\n{traceback.format_exc()}"
         print(error_msg)

@@ -16,7 +16,7 @@ feasibility analysis and the currently-in-progress Windows-only upgrade plan thi
 
 ### Polish
 
-- Global hotkey `Ctrl+Shift+Space` captures the focused control's text (selection if present,
+- Global hotkey (double-tap **Shift**) captures the focused control's text (selection if present,
   otherwise the full field) and sends it to the Polish tab.
 - Rewrites the captured text into one or more **tones** (Professional, Casual, Chatting, Formal,
   Friendly, Empathetic, Assertive, Diplomatic), each generated for every configured **goal**
@@ -25,13 +25,15 @@ feasibility analysis and the currently-in-progress Windows-only upgrade plan thi
 - Optional **cross-lingual polishing**: a configurable output language translates the source text
   before applying tone/goal rewriting.
 - Each result has "Use" (paste back into the originating control) and "Copy" (explicit clipboard
-  copy) actions.
+  copy) actions. Shift+1 through Shift+9 and Shift+0 (app-level, only while the Polish tab has
+  focus) trigger "Use" on the 1st through 10th result card, as a keyboard alternative to clicking.
 - Every Polish result is saved to History (original text, polished text, tone, goal, timestamp).
 
 ### Translate
 
-- Global hotkey `Shift+Space` captures the focused control's text the same way as Polish, into the
-  Translate tab.
+- Global hotkey (double-tap **Ctrl**) captures the focused control's text, into the Translate tab
+  (see "Capture and paste-back mechanism" below - Translate's capture mechanism differs from
+  Polish's).
 - Direct translation into a configurable target language, independent of the Polish output
   language.
 - "Copy" action only; Translate results are not saved to History.
@@ -59,19 +61,19 @@ feasibility analysis and the currently-in-progress Windows-only upgrade plan thi
 
 ## Capture and paste-back mechanism
 
-Text capture and paste-back are implemented via **Windows UI Automation**
+**Polish** capture and paste-back are implemented via **Windows UI Automation**
 (`ValuePattern`/`TextPattern` on the OS accessibility tree), not the clipboard and not simulated
-keystrokes. This is a hard constraint, not an implementation detail:
+keystrokes:
 
-- The previous approach (blank the clipboard, simulate `Ctrl+C`, poll for the result, simulate
-  `Ctrl+V`, restore the clipboard) is structurally identical to clipboard-hijacking malware
-  behavior and was flagged as such by Bitdefender and likely other AV/EDR heuristics.
+- The clipboard-blank/simulate-`Ctrl+C`/poll/restore approach is structurally identical to
+  clipboard-hijacking malware behavior and was flagged as such by Bitdefender and likely other
+  AV/EDR heuristics.
 - UI Automation reads/writes the focused control's text directly via synchronous COM calls - no
   clipboard access, no synthetic keystroke injection, and (per informal measurement against the
-  removed implementation's fixed `time.sleep` calls) roughly 350-650ms less latency per
+  clipboard-based implementation's fixed `time.sleep` calls) roughly 350-650ms less latency per
   capture/paste-back cycle for supported apps.
 - `pyperclip` remains in use elsewhere only for explicit, user-clicked "Copy" buttons - a
-  one-shot, user-initiated clipboard write is a different, non-flagged pattern from the removed
+  one-shot, user-initiated clipboard write is a different, non-flagged pattern from a
   programmatic capture loop.
 
 **Coverage is bounded by what the target app exposes to UI Automation**, not universal:
@@ -83,11 +85,18 @@ keystrokes. This is a hard constraint, not an implementation detail:
 | Higher risk | Telegram Desktop (Qt, inconsistent custom-widget accessibility instrumentation) | Uncertain |
 | Known gap | VS Code's Monaco code-editing surface (virtualized rendering, hidden-textarea input capture, selection state not exposed by default) | Likely unsupported; VS Code's non-editor UI (dialogs, search, sidebar) is unaffected |
 
-There is no clipboard/keystroke-simulation fallback for unsupported apps. When a focused control
-exposes neither `ValuePattern` nor `TextPattern`, capture fails explicitly rather than silently
-falling back to a mechanism that would reintroduce the AV-flagged pattern. The safe manual
+When a focused control exposes neither `ValuePattern` nor `TextPattern`, Polish capture fails
+explicitly rather than silently falling back to a clipboard-based mechanism. The safe manual
 alternative for unsupported apps: the user copies text themselves via the OS and pastes it into
 Grammar AI's own text field, since that never invokes a clipboard API from the app's own code.
+
+**Translate** capture, by deliberate exception, uses the clipboard-blank/simulate-`Ctrl+C`/poll/
+restore approach described above (selecting all text first if nothing is already selected),
+restoring the user's prior clipboard contents afterward. This trades the same AV-heuristic risk
+UI Automation was introduced to avoid for broader compatibility with apps that don't expose text
+via accessibility APIs - an explicit, scoped choice for Translate only. Translate has no
+paste-back (its output is Copy-button-only), so this only affects how Translate's input text is
+read, not written.
 
 ## Data storage
 

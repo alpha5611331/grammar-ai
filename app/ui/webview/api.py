@@ -1,9 +1,8 @@
 """Python <-> JS bridge exposed to the pywebview window as `pywebview.api`.
 
 All methods here are called from app/ui/webview/web/app.js via the pywebview
-js_api proxy. Business logic (LLM calls, storage, i18n, hotkey capture) is
-untouched from the Tkinter version - this module only adapts it to a
-request/response + push-update shape a webview frontend can consume.
+js_api proxy, adapting business logic (LLM calls, storage, i18n, hotkey capture)
+to a request/response + push-update shape a webview frontend can consume.
 """
 
 import json
@@ -21,17 +20,17 @@ from app.config import (
     GOALS,
     GOALS_PRESET_DEFAULT,
     GOALS_PRESET_MIN,
-    HOTKEYS,
+    HOTKEY,
     LOG_PATH,
     OUTPUT_LANGUAGES,
     TONES,
-    TRANSLATE_HOTKEYS,
+    TRANSLATE_HOTKEY,
     UI_LANGUAGES,
 )
 from app.core import single_instance, updater
 from app.core.autorun import configure_autorun
 from app.core.focus import restore_focus_and_paste
-from app.core.hotkey import _HOTKEY_ID_TRANSLATE, MOD_SHIFT, VK_SPACE, HotkeyManager
+from app.core.hotkey import HotkeyManager
 from app.core.llm import check_connection, polish_text, translate_text
 from app.db.database import (
     clear_history,
@@ -70,14 +69,14 @@ class Api:
         self._version = version
         self._window: Optional[webview.Window] = None
         self._config: AppConfig = load_config()
-        self._polish_hotkey = HotkeyManager(self._on_polish_hotkey)
-        hotkey_desc = "+".join(h.capitalize() for h in TRANSLATE_HOTKEYS)
+        self._polish_hotkey = HotkeyManager(
+            self._on_polish_hotkey, tap_key="shift", description=HOTKEY
+        )
         self._translate_hotkey = HotkeyManager(
             self._on_translate_hotkey,
-            modifiers=MOD_SHIFT,
-            vk=VK_SPACE,
-            hotkey_id=_HOTKEY_ID_TRANSLATE,
-            description=hotkey_desc,
+            tap_key="control",
+            description=TRANSLATE_HOTKEY,
+            capture_via_clipboard=True,
         )
 
     def attach_window(self, window: webview.Window) -> None:
@@ -154,8 +153,8 @@ class Api:
             "translateLanguage": load_translate_language(),
             "uiLanguageCode": load_ui_language(),
             "autorun": load_autorun(),
-            "polishHotkey": "+".join(h.capitalize() for h in HOTKEYS),
-            "translateHotkey": "+".join(h.capitalize() for h in TRANSLATE_HOTKEYS),
+            "polishHotkey": HOTKEY,
+            "translateHotkey": TRANSLATE_HOTKEY,
         }
 
     # ------------------------------------------------------------------ settings
@@ -350,6 +349,10 @@ class Api:
             return {"ok": False, "error": str(e)}
 
     # ------------------------------------------------------------------ window / tray
+
+    def close_window(self) -> None:
+        if self._window is not None:
+            self._window.destroy()
 
     def hide_to_tray(self) -> None:
         if self._window is not None:

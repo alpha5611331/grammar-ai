@@ -102,12 +102,9 @@ GOALS_PRESET_DEFAULT: list[Goal] = [
     Goal.CLARIFY,
 ]
 
-# Global hotkey
-HOTKEYS: list[str] = ["ctrl", "shift", "space"]
-HOTKEY: str = "+".join(HOTKEYS)
-
-TRANSLATE_HOTKEYS: list[str] = ["shift", "space"]
-TRANSLATE_HOTKEY: str = "+".join(TRANSLATE_HOTKEYS)
+# Global hotkey (double-tap of a lone modifier - see app/core/hotkey.py)
+HOTKEY: str = "Double Shift"
+TRANSLATE_HOTKEY: str = "Double Ctrl"
 
 # Auto-updater
 RELEASES_API = "https://api.github.com/repos/vectorleap-pulse/grammar-ai/releases/latest"

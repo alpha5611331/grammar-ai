@@ -110,6 +110,7 @@
   // ------------------------------------------------------------------ tabs
 
   function initTabs() {
+    $("window-close-btn").addEventListener("click", () => pywebview.api.close_window());
     document.querySelectorAll(".tab-btn").forEach((btn) => {
       btn.addEventListener("click", () => selectTab(btn.dataset.tab));
     });
@@ -125,6 +126,30 @@
     document.querySelectorAll(".tab-panel").forEach((p) => p.classList.toggle("active", p.id === "tab-" + name));
     $("clear-btn").disabled = name === "history";
     if (name === "history") refreshHistory();
+  }
+
+  // Shift+1..Shift+9,Shift+0 triggers "Use" on the Nth polished result card, while
+  // the Polish tab is active and focus isn't in any input/textarea/select (typing
+  // "!"/"@"/etc. produces the same e.code+shiftKey combo, so this guard is required
+  // to avoid misfiring during normal typing - see e.code vs e.key note below).
+  function initResultShortcuts() {
+    document.addEventListener("keydown", (e) => {
+      if (!e.shiftKey) return;
+      // e.key reflects the produced character (Shift+1 -> "!"), not the physical
+      // key, so digit detection must use e.code instead.
+      const m = /^Digit([0-9])$/.exec(e.code);
+      if (!m) return;
+      if (document.querySelector(".tab-btn.active")?.dataset.tab !== "polish") return;
+      const tag = document.activeElement?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+
+      const n = m[1] === "0" ? 10 : Number(m[1]);
+      const useBtn = document.querySelectorAll("#polish-results .result-card")[n - 1]?.querySelector(".use-btn");
+      if (useBtn) {
+        e.preventDefault();
+        useBtn.click();
+      }
+    });
   }
 
   // ------------------------------------------------------------------ polish
@@ -206,6 +231,7 @@
 
   function addResultCard(original, result) {
     const goalMeta = BOOT.goals.find((g) => g.value === result.goal);
+    const myIndex = BOOT_GOAL_ORDER.indexOf(result.goal);
     const card = document.createElement("div");
     card.className = "result-card";
     card.dataset.goal = result.goal;
@@ -216,11 +242,16 @@
     badge.className = "goal-badge";
     badge.textContent = goalMeta ? goalMeta.label : result.goal;
     header.appendChild(badge);
+
+    const shortcutHint = document.createElement("span");
+    shortcutHint.className = "shortcut-hint hidden";
+    header.appendChild(shortcutHint);
+
     const spacer = document.createElement("span");
     spacer.className = "spacer";
     header.appendChild(spacer);
 
-    const useBtn = makeIconButton("use", BOOT.strings.USE);
+    const useBtn = makeIconButton("use", BOOT.strings.USE, "use-btn");
     const copyBtn = makeIconButton("copy", BOOT.strings.COPY);
 
     header.appendChild(useBtn);
@@ -241,6 +272,7 @@
         goal: goalMeta ? goalMeta.label : result.goal,
       });
       setStatus($("polish-status"), label, res.pasted ? "green" : "gray");
+      pywebview.api.close_window();
     });
 
     copyBtn.addEventListener("click", async () => {
@@ -257,10 +289,31 @@
     // Keep result cards ordered the same way GOALS is ordered.
     const container = $("polish-results");
     const existing = Array.from(container.children);
-    const myIndex = BOOT_GOAL_ORDER.indexOf(result.goal);
     const before = existing.find((c) => BOOT_GOAL_ORDER.indexOf(c.dataset.goal) > myIndex);
     if (before) container.insertBefore(card, before);
     else container.appendChild(card);
+
+    renumberShortcutHints();
+  }
+
+  // The Shift+1..Shift+9,Shift+0 shortcut (initResultShortcuts) indexes cards by
+  // their actual DOM position, not by goal-list order, so the hint badges must be
+  // recomputed for every card each time one is inserted (an earlier-goal card can
+  // land before an already-displayed later-goal card, shifting everyone's position).
+  function renumberShortcutHints() {
+    const cards = document.querySelectorAll("#polish-results .result-card");
+    cards.forEach((c, i) => {
+      const hint = c.querySelector(".shortcut-hint");
+      if (!hint) return;
+      if (i < 10) {
+        const n = i === 9 ? "0" : String(i + 1);
+        hint.textContent = "⇧" + n;
+        hint.title = "Shift+" + n;
+        hint.classList.remove("hidden");
+      } else {
+        hint.classList.add("hidden");
+      }
+    });
   }
 
   function clearPolish() {
@@ -545,6 +598,7 @@
     initTranslate();
     initHistory();
     initSettings();
+    initResultShortcuts();
   }
 
   window.addEventListener("pywebviewready", boot);

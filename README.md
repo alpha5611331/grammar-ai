@@ -37,7 +37,7 @@ _Select text anywhere, press the hotkey, pick a polished version - done._
 Rewrite text into one or more **tones**, each generated for several writing **goals** (inform, persuade, clarify, and more) at once.
 
 1. In Settings, choose which **goals** to generate and optionally set a **context** to tailor output to your domain (see [Configuration](#configuration)).
-2. Enter or paste text on the **Polish** tab, or select text anywhere and press `Ctrl+Shift+Space` to send it there directly. You can also use the **Trigger** button in the app.
+2. Enter or paste text on the **Polish** tab, or select text anywhere and double-tap **Shift** to send it there directly. You can also use the **Trigger** button in the app.
 3. Select a **tone** and review the generated polished versions.
 4. Click **Use** next to the version you want, to paste it back where you copied it from.
 
@@ -73,7 +73,7 @@ _Pick from a curated list of languages - or type any language the model understa
 
 Need a straight translation without a tone/goal rewrite? The **Translate** tab is a dedicated mode for that, separate from Polish.
 
-1. Enter or paste text on the **Translate** tab, or select text anywhere and press `Shift+Space` to send it there directly.
+1. Enter or paste text on the **Translate** tab, or select text anywhere and double-tap **Ctrl** to send it there directly.
 2. Pick a **target language** from the dropdown - your choice is remembered independently of the Polish tab's language.
 3. Click **Translate** (or use the hotkey) to get the translated text, then **Copy** it to your clipboard.
 
@@ -178,9 +178,9 @@ To build a standalone executable:
 ## Tech Stack
 
 - Python 3.12
-- `tkinter` for UI
+- `pywebview` for UI
 - `openai`-compatible AI integration
-- `uiautomation` for reading/writing text in the focused window (no clipboard, no simulated keystrokes)
+- `uiautomation` for reading/writing text in the focused window (Polish; no clipboard, no simulated keystrokes)
 - `pystray` and `Pillow` for system tray
 - `loguru` for logging
 - `pydantic` for schema validation
@@ -190,13 +190,16 @@ To build a standalone executable:
 
 ## How capture works
 
-Pressing a hotkey reads the focused control's text directly via Windows UI Automation and, on
-"Use", writes the result back the same way. The app never reads, writes, or clears your system
-clipboard as part of this - clipboard is only touched when you explicitly click a "Copy" button.
-
-This means capture works in most modern apps and browsers, but not everywhere: an app has to
-expose its text field to Windows' accessibility APIs for this to work. Custom-rendered editors
+**Polish** reads the focused control's text directly via Windows UI Automation and, on "Use",
+writes the result back the same way - it never reads, writes, or clears your system clipboard.
+This means Polish capture works in most modern apps and browsers, but not everywhere: an app has
+to expose its text field to Windows' accessibility APIs for this to work. Custom-rendered editors
 (for example, VS Code's code-editing pane) may not be supported.
+
+**Translate** captures via your system clipboard and simulated Ctrl+C (selecting all text first
+if nothing is selected), restoring your previous clipboard contents afterward. This trades a
+brief, restored clipboard touch for broader compatibility across apps that don't expose text via
+accessibility APIs. Clipboard is otherwise only touched when you explicitly click a "Copy" button.
 
 ---
 
