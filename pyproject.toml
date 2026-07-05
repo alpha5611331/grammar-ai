@@ -46,6 +46,9 @@ include = [
 [tool.ruff]
 target-version = "py312"
 line-length = 100
+# .claude/skills holds vendored third-party skill files (verbatim copies from their
+# upstream repos) - excluded so `ruff format .`/`ruff check .` never rewrites them.
+extend-exclude = [".claude"]
 
 [tool.ruff.lint]
 select = [
@@ -64,4 +67,5 @@ ignore_missing_imports = true
 warn_return_any = false
 exclude = [
     "build/",
+    ".claude/",
 ]

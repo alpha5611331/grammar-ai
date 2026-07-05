@@ -1,6 +1,6 @@
 @echo off
 REM Build script for Grammar AI on Windows
-REM Requires: Python 3.12+, PyInstaller installed (uv sync --extra dev)
+REM Requires: Python 3.12+, PyInstaller installed (uv sync --extra dev), Node.js + pnpm
 REM Output: build\grammar-ai\  (standalone dir, bundled by installer.iss)
 
 if "%1"=="debug" goto debug_build

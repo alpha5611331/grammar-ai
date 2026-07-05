@@ -8,9 +8,7 @@ hotkey, and gets AI-generated results they can paste back without leaving the ap
 
 ## Platform
 
-Windows only. No browser extension, no Linux/macOS support at this time (see
-`C:\Users\admin\.claude\plans\is-it-possible-to-inherited-creek.md` for the parked cross-platform
-feasibility analysis and the currently-in-progress Windows-only upgrade plan this spec reflects).
+Windows only. No browser extension, no Linux/macOS support at this time.
 
 ## Core features
 
