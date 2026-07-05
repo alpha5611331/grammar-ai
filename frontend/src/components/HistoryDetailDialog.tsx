@@ -36,9 +36,13 @@ export function HistoryDetailDialog({
               </div>
             </div>
             <hr className="border-border" />
-            <label className="text-[11px] font-semibold text-muted-foreground">{boot.strings.ORIGINAL_TEXT}</label>
+            <label className="text-[11px] font-semibold text-muted-foreground">
+              {boot.strings.ORIGINAL_TEXT}
+            </label>
             <Textarea readOnly rows={4} value={entry.originalText} />
-            <label className="text-[11px] font-semibold text-muted-foreground">{boot.strings.POLISHED_TEXT}</label>
+            <label className="text-[11px] font-semibold text-muted-foreground">
+              {boot.strings.POLISHED_TEXT}
+            </label>
             <Textarea readOnly rows={4} value={entry.polishedText} />
           </div>
         )}

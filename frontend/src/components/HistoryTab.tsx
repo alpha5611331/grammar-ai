@@ -19,14 +19,11 @@ export function HistoryTab({ active }: { active: boolean }) {
   const [totalCount, setTotalCount] = useState(0);
   const [detail, setDetail] = useState<HistoryEntry | null>(null);
 
-  const refresh = useCallback(
-    async (targetPage: number, size: number) => {
-      const res = await api().get_history(targetPage, size);
-      setEntries(res.entries);
-      setTotalCount(res.totalCount);
-    },
-    []
-  );
+  const refresh = useCallback(async (targetPage: number, size: number) => {
+    const res = await api().get_history(targetPage, size);
+    setEntries(res.entries);
+    setTotalCount(res.totalCount);
+  }, []);
 
   // Load whenever the tab becomes active, or paging/size changes while active
   // (app.js refreshes on tab-select and after every pager/size/clear action).
@@ -109,11 +106,7 @@ export function HistoryTab({ active }: { active: boolean }) {
         </thead>
         <tbody>
           {entries.map((entry) => (
-            <tr
-              key={entry.id}
-              className="cursor-pointer hover:bg-muted"
-              onClick={() => setDetail(entry)}
-            >
+            <tr key={entry.id} className="cursor-pointer hover:bg-muted" onClick={() => setDetail(entry)}>
               <td className="max-w-[140px] truncate border-b border-border px-1.5 py-1">{entry.usedAt}</td>
               <td className="max-w-[140px] truncate border-b border-border px-1.5 py-1">{entry.tone}</td>
               <td className="max-w-[140px] truncate border-b border-border px-1.5 py-1">{entry.goal}</td>

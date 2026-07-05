@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckIcon, CopyIcon } from "lucide-react";
+import { CheckIcon, CopyIcon, Trash2Icon } from "lucide-react";
 import { forwardRef, useImperativeHandle } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,7 +12,6 @@ import { statusColorClass } from "@/lib/status";
 
 export interface TranslateTabHandle {
   run: (text: string) => void;
-  clear: () => void;
 }
 
 interface TranslateTabProps {
@@ -29,7 +28,7 @@ export const TranslateTab = forwardRef<TranslateTabHandle, TranslateTabProps>(fu
   const translate = useTranslate(onError);
   const [justCopied, setJustCopied] = useState(false);
 
-  useImperativeHandle(ref, () => ({ run: translate.run, clear: translate.clear }));
+  useImperativeHandle(ref, () => ({ run: translate.run }));
 
   const triggerFromButton = () => {
     const text = translate.original.trim();
@@ -53,16 +52,37 @@ export const TranslateTab = forwardRef<TranslateTabHandle, TranslateTabProps>(fu
         <label className="mb-1 block text-[11px] font-semibold text-muted-foreground">
           {boot.strings.ORIGINAL_TEXT}
         </label>
-        <Textarea rows={5} value={translate.original} onChange={(e) => translate.setOriginal(e.target.value)} />
+        <Textarea
+          rows={5}
+          value={translate.original}
+          onChange={(e) => translate.setOriginal(e.target.value)}
+        />
       </div>
 
       <div className="flex items-center gap-1.5">
-        <Button type="button" size="sm" variant="outline" disabled={translate.busy} onClick={triggerFromButton}>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          disabled={translate.busy}
+          onClick={triggerFromButton}
+        >
           {boot.strings.TRANSLATE} ({boot.translateHotkey})
         </Button>
         <span className={cn("text-[11px]", statusColorClass(translate.status.color))}>
           {translate.status.text}
         </span>
+        <span className="flex-1" />
+        <Button
+          type="button"
+          variant="outline"
+          size="icon-sm"
+          title={boot.strings.CLEAR}
+          aria-label={boot.strings.CLEAR}
+          onClick={translate.clear}
+        >
+          <Trash2Icon />
+        </Button>
       </div>
 
       <div>

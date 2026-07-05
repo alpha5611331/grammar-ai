@@ -18,10 +18,13 @@ cd frontend && pnpm install && pnpm build   # build the React UI -> app/ui/webvi
 uv run python main.py        # run the app from source
 uv run python main.py --tray-only   # run minimized to the system tray
 
-uv run python lint.py        # ruff format + ruff check --fix + mypy (what CI runs)
+uv run python lint.py        # ruff format + ruff check --fix + mypy + frontend prettier/oxlint
 uv run ruff format .
 uv run ruff check --fix .
 uv run mypy .
+
+cd frontend && pnpm run format   # prettier --write . (what lint.py runs)
+cd frontend && pnpm run lint     # oxlint (what lint.py runs, with --fix)
 
 uv run python build.py       # builds the frontend, then PyInstaller onedir build -> build/grammar-ai/
 uv run python build.py --debug   # same, but console-attached for debugging
@@ -29,11 +32,13 @@ uv run python build.py --debug   # same, but console-attached for debugging
 
 There is no test suite in this repository (Python or frontend).
 
-CI (`.github/workflows/lint.yml`) runs `lint.py` on every PR to `main`, on `ubuntu-latest`, even
-though the app itself is Windows-only at runtime - it only lints Python, so it doesn't need Node.
-`.github/workflows/build-release.yml` is a manual (`workflow_dispatch`) job on `windows-latest`
-that bumps the version, sets up pnpm/Node, builds via `build.py` (which builds the frontend
-first), packages with Inno Setup (`installer.iss`), and publishes a GitHub Release.
+CI (`.github/workflows/lint.yml`) runs `lint.py` on every PR to `main`, on `ubuntu-latest`. Even
+though the app itself is Windows-only at runtime, `lint.py` also runs the frontend's prettier +
+oxlint (see `frontend/package.json`), so this workflow sets up pnpm/Node too, same as
+`build-release.yml` below. `.github/workflows/build-release.yml` is a manual (`workflow_dispatch`)
+job on `windows-latest` that bumps the version, sets up pnpm/Node, builds via `build.py` (which
+builds the frontend first), packages with Inno Setup (`installer.iss`), and publishes a GitHub
+Release.
 
 ## Architecture
 

@@ -88,7 +88,11 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     onOpenChange(false);
     if (
       res.restartRequired &&
-      (await confirm(boot.strings.RESTART_TO_APPLY_LANGUAGE, boot.strings.RESTART_NOW, boot.strings.RESTART_LATER))
+      (await confirm(
+        boot.strings.RESTART_TO_APPLY_LANGUAGE,
+        boot.strings.RESTART_NOW,
+        boot.strings.RESTART_LATER
+      ))
     ) {
       void api().restart_app();
     }
@@ -121,7 +125,11 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
             />
           </Field>
           <Field label={boot.strings.TRANSLATE_LANGUAGE}>
-            <LanguageSelect value={translateLanguage} onChange={setTranslateLanguage} options={boot.outputLanguages} />
+            <LanguageSelect
+              value={translateLanguage}
+              onChange={setTranslateLanguage}
+              options={boot.outputLanguages}
+            />
           </Field>
           <Field label={boot.strings.INTERFACE_LANGUAGE}>
             <LanguageSelect value={uiLanguage} onChange={setUiLanguage} options={boot.uiLanguages} />
@@ -137,13 +145,28 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
               {boot.strings.GOALS_TO_GENERATE}
             </legend>
             <div className="mb-1.5 flex gap-1">
-              <Button type="button" size="xs" variant="outline" onClick={() => setGoals(boot.goalPresets.minimum)}>
+              <Button
+                type="button"
+                size="xs"
+                variant="outline"
+                onClick={() => setGoals(boot.goalPresets.minimum)}
+              >
                 {boot.strings.MINIMUM}
               </Button>
-              <Button type="button" size="xs" variant="outline" onClick={() => setGoals(boot.goalPresets.default)}>
+              <Button
+                type="button"
+                size="xs"
+                variant="outline"
+                onClick={() => setGoals(boot.goalPresets.default)}
+              >
                 {boot.strings.DEFAULT}
               </Button>
-              <Button type="button" size="xs" variant="outline" onClick={() => setGoals(boot.goalPresets.all)}>
+              <Button
+                type="button"
+                size="xs"
+                variant="outline"
+                onClick={() => setGoals(boot.goalPresets.all)}
+              >
                 {boot.strings.ALL}
               </Button>
             </div>
@@ -158,11 +181,18 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                 </label>
               ))}
             </div>
-            <p className="mt-1.5 text-[10px] italic text-muted-foreground">{boot.strings.MORE_GOALS_DISCLAIMER}</p>
+            <p className="mt-1.5 text-[10px] italic text-muted-foreground">
+              {boot.strings.MORE_GOALS_DISCLAIMER}
+            </p>
           </fieldset>
 
           <Field label={boot.strings.CONTEXT}>
-            <Textarea rows={3} value={context} onChange={(e) => setContext(e.target.value)} title={boot.strings.CONTEXT_TOOLTIP} />
+            <Textarea
+              rows={3}
+              value={context}
+              onChange={(e) => setContext(e.target.value)}
+              title={boot.strings.CONTEXT_TOOLTIP}
+            />
           </Field>
 
           <div className={`min-h-3.5 text-[11px] ${statusColorClass(status.color)}`}>{status.text}</div>

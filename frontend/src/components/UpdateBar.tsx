@@ -6,13 +6,7 @@ export interface UpdateInfo {
   version: string;
 }
 
-export function UpdateBar({
-  update,
-  onDismiss,
-}: {
-  update: UpdateInfo | null;
-  onDismiss: () => void;
-}) {
+export function UpdateBar({ update, onDismiss }: { update: UpdateInfo | null; onDismiss: () => void }) {
   const { boot } = useBootstrap();
   if (!update) return null;
 

@@ -1,4 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from "react";
+import { Trash2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -11,7 +12,6 @@ import { statusColorClass } from "@/lib/status";
 
 export interface PolishTabHandle {
   run: (text: string) => void;
-  clear: () => void;
 }
 
 interface PolishTabProps {
@@ -22,7 +22,7 @@ interface PolishTabProps {
 // Digit hint text for the Nth card, matching app.js's renumberShortcutHints() (app.js:313-327).
 function shortcutHintFor(index: number): string | null {
   if (index >= 10) return null;
-  return "Shift" + (index === 9 ? "0" : String(index + 1));
+  return "Shift+" + (index === 9 ? "0" : String(index + 1));
 }
 
 export const PolishTab = forwardRef<PolishTabHandle, PolishTabProps>(function PolishTab(
@@ -34,7 +34,7 @@ export const PolishTab = forwardRef<PolishTabHandle, PolishTabProps>(function Po
   const polish = usePolish(onError);
   const cardRefs = useRef<Array<ResultCardHandle | null>>([]);
 
-  useImperativeHandle(ref, () => ({ run: polish.run, clear: polish.clear }));
+  useImperativeHandle(ref, () => ({ run: polish.run }));
 
   const triggerFromButton = () => {
     const text = polish.original.trim();
@@ -85,7 +85,9 @@ export const PolishTab = forwardRef<PolishTabHandle, PolishTabProps>(function Po
             {/* base-ui's Select.Value shows the raw value (tone.value, e.g. "professional")
                 unless told how to render it - it doesn't look up the matching SelectItem's
                 label on its own like Radix does. */}
-            <SelectValue>{(value: string | null) => (value ? toneMetaByValue.get(value)?.label : null)}</SelectValue>
+            <SelectValue>
+              {(value: string | null) => (value ? toneMetaByValue.get(value)?.label : null)}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {boot.tones.map((tone) => (
@@ -97,6 +99,17 @@ export const PolishTab = forwardRef<PolishTabHandle, PolishTabProps>(function Po
         </Select>
         <Button type="button" size="sm" variant="outline" disabled={polish.busy} onClick={triggerFromButton}>
           {boot.strings.POLISH} ({boot.polishHotkey})
+        </Button>
+        <span className="flex-1" />
+        <Button
+          type="button"
+          variant="outline"
+          size="icon-sm"
+          title={boot.strings.CLEAR}
+          aria-label={boot.strings.CLEAR}
+          onClick={polish.clear}
+        >
+          <Trash2Icon />
         </Button>
       </div>
 

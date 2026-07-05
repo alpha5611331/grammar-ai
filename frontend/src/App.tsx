@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { SettingsIcon, Trash2Icon } from "lucide-react";
+import { SettingsIcon } from "lucide-react";
 import { Titlebar } from "@/components/Titlebar";
 import { UpdateBar, type UpdateInfo } from "@/components/UpdateBar";
 import { PolishTab, type PolishTabHandle } from "@/components/PolishTab";
@@ -42,11 +42,6 @@ export function App() {
     };
   }, []);
 
-  const clearActive = () => {
-    if (tab === "polish") polishRef.current?.clear();
-    else if (tab === "translate") translateRef.current?.clear();
-  };
-
   return (
     <div className="flex h-screen flex-col overflow-hidden">
       <Titlebar appName={boot.appName} />
@@ -54,18 +49,17 @@ export function App() {
 
       <nav className="flex items-center gap-0.5 border-b border-border px-1 pt-1">
         <TabButton label={boot.strings.POLISH} active={tab === "polish"} onClick={() => setTab("polish")} />
-        <TabButton label={boot.strings.TRANSLATE} active={tab === "translate"} onClick={() => setTab("translate")} />
-        <TabButton label={boot.strings.HISTORY} active={tab === "history"} onClick={() => setTab("history")} />
+        <TabButton
+          label={boot.strings.TRANSLATE}
+          active={tab === "translate"}
+          onClick={() => setTab("translate")}
+        />
+        <TabButton
+          label={boot.strings.HISTORY}
+          active={tab === "history"}
+          onClick={() => setTab("history")}
+        />
         <span className="flex-1" />
-        <button
-          type="button"
-          title={boot.strings.CLEAR}
-          disabled={tab === "history"}
-          onClick={clearActive}
-          className="rounded p-1.5 text-foreground hover:bg-border disabled:opacity-40"
-        >
-          <Trash2Icon className="size-3.5" />
-        </button>
         <button
           type="button"
           title={boot.strings.SETTINGS}
