@@ -1,13 +1,14 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+    /* System fonts instead of the scaffold's bundled Geist - keeps the app self-contained
+       and matches the old style.css font stack. font-heading is used by shadcn dialog titles. */
+    --font-sans: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
     --font-heading: var(--font-sans);
-    --font-sans: 'Geist Variable', sans-serif;
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -48,83 +49,97 @@
     --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/*
+  Palette ported from the old app/ui/webview/web/style.css (its :root and the
+  prefers-color-scheme:dark block). Mapping:
+    --bg      -> --background        --fg       -> --foreground
+    --card-bg -> --card / --popover  --accent   -> --primary / --ring
+    --border  -> --border / --input  --muted    -> --muted-foreground
+    --danger  -> --destructive
+  This app has no manual theme switch, only OS-driven dark mode, so the dark
+  overrides live under @media (prefers-color-scheme: dark) on :root rather than a
+  .dark class. Compact 380px-wide UI: small default radius and 13px base font.
+*/
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
+    --radius: 0.375rem;
+
+    --background: #f4f4f5;
+    --foreground: #1c1c1e;
+    --card: #ffffff;
+    --card-foreground: #1c1c1e;
+    --popover: #ffffff;
+    --popover-foreground: #1c1c1e;
+    --primary: #2563eb;
+    --primary-foreground: #ffffff;
+    --secondary: #e4e4e7;
+    --secondary-foreground: #1c1c1e;
+    --muted: #e9e9ec;
+    --muted-foreground: #6b7280;
+    --accent: #e4e4e7;
+    --accent-foreground: #1c1c1e;
+    --destructive: #dc2626;
+    --border: #d0d0d5;
+    --input: #d0d0d5;
+    --ring: #2563eb;
+
+    --chart-1: #2563eb;
+    --chart-2: #16a34a;
+    --chart-3: #dc2626;
+    --chart-4: #6b7280;
+    --chart-5: #9333ea;
+
+    --sidebar: #ffffff;
+    --sidebar-foreground: #1c1c1e;
+    --sidebar-primary: #2563eb;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #e4e4e7;
+    --sidebar-accent-foreground: #1c1c1e;
+    --sidebar-border: #d0d0d5;
+    --sidebar-ring: #2563eb;
 }
 
-.dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background: #1c1c1e;
+        --foreground: #f2f2f2;
+        --card: #2a2a2d;
+        --card-foreground: #f2f2f2;
+        --popover: #2a2a2d;
+        --popover-foreground: #f2f2f2;
+        --primary: #2563eb;
+        --primary-foreground: #ffffff;
+        --secondary: #3a3a3d;
+        --secondary-foreground: #f2f2f2;
+        --muted: #333336;
+        --muted-foreground: #9a9a9e;
+        --accent: #3a3a3d;
+        --accent-foreground: #f2f2f2;
+        --destructive: #f87171;
+        --border: #3a3a3d;
+        --input: #3a3a3d;
+        --ring: #3b82f6;
+
+        --sidebar: #2a2a2d;
+        --sidebar-foreground: #f2f2f2;
+        --sidebar-primary: #3b82f6;
+        --sidebar-primary-foreground: #ffffff;
+        --sidebar-accent: #3a3a3d;
+        --sidebar-accent-foreground: #f2f2f2;
+        --sidebar-border: #3a3a3d;
+        --sidebar-ring: #3b82f6;
+    }
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+    * {
+        @apply border-border outline-ring/50;
     }
-  body {
-    @apply bg-background text-foreground;
+    html {
+        color-scheme: light dark;
+        font-size: 13px;
     }
-  html {
-    @apply font-sans;
+    body {
+        @apply bg-background text-foreground;
+        font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
     }
 }
