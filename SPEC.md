@@ -54,8 +54,10 @@ Windows only. No browser extension, no Linux/macOS support at this time.
 - System tray icon (open/quit), with an optional `--tray-only` launch mode.
 - Single-instance enforcement: a second launch focuses the existing window instead of starting a
   new process.
-- Background auto-update check against GitHub Releases, surfaced as a dismissible in-app banner
-  linking to the release page (no silent self-update).
+- Background auto-update check against GitHub Releases: on finding a newer version, the installer
+  is downloaded automatically to the user's Downloads folder, then a dismissible in-app banner
+  offers to reveal it. "Update Now" opens Explorer with the installer selected - it is never
+  executed by the app itself, only ever launched by an explicit user double-click.
 
 ## Capture and paste-back mechanism
 
@@ -106,7 +108,11 @@ read, not written.
 ## Non-goals (current scope)
 
 - No Linux or macOS support.
-- No silent/automatic self-update (update check only, user opens the release page manually).
+- No silent/automatic self-update: the installer is downloaded automatically, but never executed
+  by the app itself - only ever launched by an explicit user double-click in Explorer. Deliberate:
+  a process that downloads and then executes an unsigned binary itself is a common AV/EDR
+  dropper-behavior heuristic trigger; requiring a human double-click is the same pattern browsers
+  already use for downloaded files.
 - No cloud sync of settings or history - everything is local to the machine.
 - No support for elevated/protected target processes (UI Automation, like any unelevated caller,
   cannot read from or write to a window running at a higher integration level).

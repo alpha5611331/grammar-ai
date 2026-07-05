@@ -10,6 +10,7 @@ import os
 import sys
 import threading
 import webbrowser
+from pathlib import Path
 from typing import Any, Optional
 
 import webview
@@ -69,6 +70,7 @@ class Api:
         self._version = version
         self._window: Optional[webview.Window] = None
         self._config: AppConfig = load_config()
+        self._downloaded_installer_path: Optional[Path] = None
         self._polish_hotkey = HotkeyManager(
             self._on_polish_hotkey, tap_key="shift", description=HOTKEY
         )
@@ -333,10 +335,35 @@ class Api:
     # ------------------------------------------------------------------ updater
 
     def _check_update_worker(self) -> None:
-        result = updater.check_for_update(self._version)
-        if result:
-            new_version, url = result
-            self._eval(f"window.onUpdateAvailable({_js(new_version)}, {_js(url)})")
+        info = updater.check_for_update(self._version)
+        if info is None:
+            return
+        try:
+            downloads_dir = updater.get_downloads_folder()
+            path = updater.download_installer(info.download_url, downloads_dir)
+        except Exception as e:
+            # Download failures aren't surfaced to the UI - just retried on the next
+            # check (there isn't one yet, see app/config.py's UPDATE_CHECK_INTERVAL_MS),
+            # same as check_for_update() already does for its own failures.
+            logger.warning(f"Update download failed: {e}")
+            return
+        self._downloaded_installer_path = path
+        self._eval(f"window.onUpdateAvailable({_js(info.version)})")
+
+    def open_installer_and_quit(self) -> dict:
+        if self._downloaded_installer_path is None:
+            return {"ok": False}
+        updater.open_containing_folder(self._downloaded_installer_path)
+        # Deliberately not self.quit_app(): it calls self._window.destroy(), which
+        # fires pywebview's `closing` event - and main.py's handler intercepts that
+        # into a window.hide() (canceling the destroy) whenever autorun is on, so the
+        # process would never actually exit. Same reasoning as restart_app()'s
+        # os.execv, but this needs a genuine process exit rather than a re-exec, and
+        # os._exit() (not sys.exit()) is used since a background thread calling
+        # sys.exit() would only terminate that thread, not the process.
+        self.shutdown()
+        single_instance.release_lock()
+        os._exit(0)
 
     def open_url(self, url: str) -> None:
         webbrowser.open(url)

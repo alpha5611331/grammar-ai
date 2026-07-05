@@ -35,7 +35,7 @@ export function App() {
         translateRef.current?.run(text);
       }
     };
-    window.onUpdateAvailable = (version, url) => setUpdate({ version, url });
+    window.onUpdateAvailable = (version) => setUpdate({ version });
     return () => {
       delete window.onHotkeyCapture;
       delete window.onUpdateAvailable;

@@ -116,6 +116,7 @@ export interface PywebviewApi {
   close_window(): Promise<void>;
   hide_to_tray(): Promise<void>;
   quit_app(): Promise<void>;
+  open_installer_and_quit(): Promise<{ ok: boolean }>;
 }
 
 declare global {
@@ -133,7 +134,7 @@ declare global {
     onPolishError?: (originalText: string, error: string) => void;
     onTranslateDone?: (result: string) => void;
     onTranslateError?: (error: string) => void;
-    onUpdateAvailable?: (version: string, url: string) => void;
+    onUpdateAvailable?: (version: string) => void;
   }
 }
 

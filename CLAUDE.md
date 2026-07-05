@@ -87,8 +87,26 @@ table (all `Msg` members) once at load, and components render from that dict via
 - `single_instance.py` — named Win32 mutex + event so a second launch focuses the existing window
   instead of starting a new process.
 - `autorun.py` — writes/removes a value under `HKCU\...\Run` for start-on-login.
-- `updater.py` — polls the GitHub Releases API for `vectorleap-pulse/grammar-ai`; `Api` surfaces a
-  dismissible update banner via `window.onUpdateAvailable(...)`.
+- `updater.py` — polls the GitHub Releases API for `vectorleap-pulse/grammar-ai`; on finding a
+  newer release, downloads its installer to the user's real Downloads folder (resolved via
+  `SHGetKnownFolderPath`/`FOLDERID_Downloads`, not `Path.home() / "Downloads"` - the user may have
+  relocated it or have OneDrive Known Folder Move redirecting it elsewhere), atomically (temp file
+  + `os.replace`, so a crash mid-download never leaves a truncated file at the path the
+  already-downloaded check looks for) and idempotently (skips re-downloading if that
+  version-qualified filename already exists), then marks it with the Mark-of-the-Web
+  zone-identifier so SmartScreen treats it exactly as it would a manual browser download. `Api`
+  surfaces a dismissible banner via `window.onUpdateAvailable(version)` once the download
+  succeeds. **The app never executes the downloaded installer itself** -
+  `Api.open_installer_and_quit()` only opens Explorer with it selected
+  (`updater.open_containing_folder`) and then hard-exits; the installer only ever runs from an
+  explicit user double-click. This is deliberate: a process that downloads and executes an
+  unsigned binary itself is a common dropper-behavior signature that AV/EDR heuristics watch for -
+  this codebase has already been burned once by a different flagged pattern (see the
+  clipboard-capture note below), so the update flow is designed to never create that one. The
+  hard-exit in `open_installer_and_quit()` cannot use `Api.quit_app()` - see its own comment for
+  why (same `window.destroy()`/autorun-hide pitfall as `restart_app()`, which is why this uses
+  `os._exit()` after `shutdown()` + releasing the single-instance lock, same as `restart_app()`
+  minus the `os.execv` re-launch).
 - `llm.py` — the only non-Windows-specific module here: an OpenAI-compatible client (BYO base
   URL/key/model — Groq, OpenAI, etc., configured in Settings) used for both Polish and Translate.
 

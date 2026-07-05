@@ -4,7 +4,6 @@ import { useBootstrap } from "@/hooks/useBootstrap";
 
 export interface UpdateInfo {
   version: string;
-  url: string;
 }
 
 export function UpdateBar({
@@ -24,7 +23,7 @@ export function UpdateBar({
       <button
         type="button"
         className="rounded border border-border bg-card px-2 py-1 text-xs"
-        onClick={() => api().open_url(update.url)}
+        onClick={() => void api().open_installer_and_quit()}
       >
         {boot.strings.UPDATE_NOW}
       </button>
