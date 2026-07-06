@@ -44,7 +44,7 @@ export function App() {
 
   return (
     <div className="flex h-screen flex-col overflow-hidden">
-      <Titlebar appName={boot.appName} />
+      <Titlebar appName={boot.appName} version={boot.version} />
       <UpdateBar update={update} onDismiss={() => setUpdate(null)} />
 
       <nav className="flex items-center gap-0.5 border-b border-border px-1 pt-1">

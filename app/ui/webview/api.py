@@ -69,6 +69,7 @@ class Api:
     def __init__(self, version: str) -> None:
         self._version = version
         self._window: Optional[webview.Window] = None
+        self._tray_icon: Any = None
         self._config: AppConfig = load_config()
         self._downloaded_installer_path: Optional[Path] = None
         self._polish_hotkey = HotkeyManager(
@@ -91,6 +92,19 @@ class Api:
     def shutdown(self) -> None:
         self._polish_hotkey.disable()
         self._translate_hotkey.disable()
+
+    def attach_tray_icon(self, icon: Any) -> None:
+        self._tray_icon = icon
+
+    def stop_tray_icon(self) -> None:
+        if self._tray_icon is None:
+            return
+        try:
+            self._tray_icon.stop()
+        except Exception as exc:
+            logger.debug(f"tray icon stop failed: {exc}")
+        finally:
+            self._tray_icon = None
 
     def _eval(self, js: str) -> None:
         if self._window is None:
@@ -362,6 +376,7 @@ class Api:
         # os._exit() (not sys.exit()) is used since a background thread calling
         # sys.exit() would only terminate that thread, not the process.
         self.shutdown()
+        self.stop_tray_icon()
         single_instance.release_lock()
         os._exit(0)
 
@@ -387,6 +402,7 @@ class Api:
 
     def quit_app(self) -> None:
         self.shutdown()
+        self.stop_tray_icon()
         single_instance.release_lock()
         if self._window is not None:
             try:

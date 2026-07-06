@@ -51,7 +51,6 @@ def _run_tray(api, window) -> None:
         window.restore()
 
     def on_quit(*_: object) -> None:
-        icon.stop()
         api.quit_app()
 
     icon_image = Image.open(ICON_PATH).convert("RGBA")
@@ -60,6 +59,7 @@ def _run_tray(api, window) -> None:
         pystray.MenuItem(t(Msg.QUIT), on_quit),
     )
     icon = pystray.Icon(APP_NAME, icon_image, APP_NAME, menu)
+    api.attach_tray_icon(icon)
     icon.run()
 
 

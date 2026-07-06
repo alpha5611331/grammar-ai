@@ -88,7 +88,7 @@ export const ResultCard = forwardRef<ResultCardHandle, ResultCardProps>(function
         rows={3}
         value={text}
         onChange={(e) => setText(e.target.value)}
-        className="min-h-0 border-none bg-transparent p-0 shadow-none focus-visible:ring-0"
+        className="min-h-0 border-none p-0 shadow-none"
       />
     </div>
   );
