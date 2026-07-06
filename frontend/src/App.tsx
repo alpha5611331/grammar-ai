@@ -7,6 +7,7 @@ import { HistoryTab } from "@/components/HistoryTab";
 import { SettingsDialog } from "@/components/SettingsDialog";
 import { ErrorDialog } from "@/components/ErrorDialog";
 import { useBootstrap } from "@/hooks/useBootstrap";
+import { api } from "@/lib/pywebview";
 import { cn } from "@/lib/utils";
 
 type TabName = "polish" | "translate" | "history";
@@ -35,11 +36,23 @@ export function App() {
       }
     };
     window.onUpdateAvailable = (version) => setUpdate({ version });
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key !== "Escape") return;
+      const tag = (document.activeElement as HTMLElement | null)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      if (settingsOpen || errorMessage) return;
+      event.preventDefault();
+      void api().close_window();
+    }
+
+    document.addEventListener("keydown", onKeyDown);
     return () => {
+      document.removeEventListener("keydown", onKeyDown);
       delete window.onHotkeyCapture;
       delete window.onUpdateAvailable;
     };
-  }, []);
+  }, [settingsOpen, errorMessage]);
 
   return (
     <div className="flex h-screen flex-col overflow-hidden">
