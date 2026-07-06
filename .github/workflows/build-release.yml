@@ -33,6 +33,20 @@ jobs:
     - name: Install dependencies
       run: uv sync --extra dev
 
+    # build.py shells out to pnpm to build the React frontend (frontend/) before
+    # PyInstaller packaging - see build.py's _build_frontend().
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: latest
+
+    - name: Install Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'pnpm'
+        cache-dependency-path: frontend/pnpm-lock.yaml
+
     - name: Bump version
       id: bump_version
       run: uv run python .github/scripts/bump_version.py "${{ github.event.inputs.version_bump }}"
@@ -49,6 +63,9 @@ jobs:
         $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
         & $iscc /DAppVersion="${{ steps.bump_version.outputs.new_version }}" installer.iss
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        # Not yet code-signed. An unsigned exe/installer is a common AV/SmartScreen
+        # false-positive trigger; signing with an Authenticode cert (stored as a CI
+        # secret) here would be the next step if that becomes a problem in practice.
 
     # Commit and tag only after both build steps succeed.
     # This keeps the repo clean: a failed build leaves no orphaned version bump.

@@ -26,11 +26,29 @@ def _make_ico(png_path: Path, ico_path: Path) -> None:
     )
 
 
+def _build_frontend(frontend_dir: Path) -> int:
+    """Build the React UI (frontend/) into app/ui/webview/web via `pnpm build`.
+
+    shell=True is needed on Windows: pnpm is a .cmd/.ps1 shim, and subprocess won't
+    resolve that without going through the shell.
+    """
+    print("Building frontend (pnpm install && pnpm build)...")
+    install = subprocess.run("pnpm install --frozen-lockfile", cwd=frontend_dir, shell=True)
+    if install.returncode != 0:
+        return install.returncode
+    result = subprocess.run("pnpm build", cwd=frontend_dir, shell=True)
+    return result.returncode
+
+
 def build_exe(debug: bool = False) -> int:
     """Build Grammar AI as a PyInstaller onedir distribution."""
     root = Path(__file__).parent
     build_dir = root / "build"
     build_dir.mkdir(exist_ok=True)
+
+    frontend_rc = _build_frontend(root / "frontend")
+    if frontend_rc != 0:
+        return frontend_rc
 
     version = get_project_version(root / "pyproject.toml")
 
@@ -49,6 +67,7 @@ def build_exe(debug: bool = False) -> int:
         "--name=grammar-ai",
         f"--add-data={root / 'pyproject.toml'}{sep}.",
         f"--add-data={root / 'resources' / 'icon.png'}{sep}resources",
+        f"--add-data={root / 'app' / 'ui' / 'webview' / 'web'}{sep}app/ui/webview/web",
         "--collect-all=openai",
         "--collect-all=httpx",
         "--collect-all=pystray",

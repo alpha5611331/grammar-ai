@@ -27,8 +27,7 @@ LOG_PATH = DATA_DIR / "grammar_ai.log"
 ERROR_LOG_PATH = DATA_DIR / "error.log"
 
 # Cross-lingual polishing - output language for polished text.
-# Maps the friendly label shown in Settings to the value passed to the model. The
-# combobox stays editable, so any language name the model understands also works.
+# Maps the friendly label shown in Settings to the value passed to the model.
 DEFAULT_OUTPUT_LANGUAGE = "English"
 OUTPUT_LANGUAGES: dict[str, str] = {
     "English": "English",
@@ -102,12 +101,9 @@ GOALS_PRESET_DEFAULT: list[Goal] = [
     Goal.CLARIFY,
 ]
 
-# Global hotkey
-HOTKEYS: list[str] = ["ctrl", "shift", "space"]
-HOTKEY: str = "+".join(HOTKEYS)
-
-TRANSLATE_HOTKEYS: list[str] = ["shift", "space"]
-TRANSLATE_HOTKEY: str = "+".join(TRANSLATE_HOTKEYS)
+# Global hotkey (double-tap of a lone modifier - see app/core/hotkey.py)
+HOTKEY: str = "Double Shift"
+TRANSLATE_HOTKEY: str = "Double Ctrl"
 
 # Auto-updater
 RELEASES_API = "https://api.github.com/repos/vectorleap-pulse/grammar-ai/releases/latest"

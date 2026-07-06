@@ -19,5 +19,22 @@ jobs:
     - name: Install dependencies
       run: uv sync --extra dev
 
+    # lint.py also runs the frontend's prettier + oxlint (see frontend/package.json).
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: latest
+
+    - name: Install Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'pnpm'
+        cache-dependency-path: frontend/pnpm-lock.yaml
+
+    - name: Install frontend dependencies
+      run: pnpm install --frozen-lockfile
+      working-directory: frontend
+
     - name: Run linter
       run: uv run python lint.py

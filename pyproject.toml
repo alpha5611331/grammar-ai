@@ -8,10 +8,11 @@ dependencies = [
     "pydantic>=2.0",
     "loguru>=0.7",
     "pyperclip>=1.8",
-    "keyboard>=0.13",
     "pyautogui>=0.9",
     "pystray>=0.19",
     "Pillow>=9.0",
+    "uiautomation>=2.0; sys_platform == 'win32'",
+    "pywebview>=5.0",
 ]
 
 [project.optional-dependencies]
@@ -45,6 +46,9 @@ include = [
 [tool.ruff]
 target-version = "py312"
 line-length = 100
+# .claude/skills holds vendored third-party skill files (verbatim copies from their
+# upstream repos) - excluded so `ruff format .`/`ruff check .` never rewrites them.
+extend-exclude = [".claude"]
 
 [tool.ruff.lint]
 select = [
@@ -63,4 +67,5 @@ ignore_missing_imports = true
 warn_return_any = false
 exclude = [
     "build/",
+    ".claude/",
 ]

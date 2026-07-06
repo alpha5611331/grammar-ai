@@ -20,6 +20,7 @@ _WAIT_OBJECT_0 = 0
 _EVENT_MODIFY_STATE = 0x0002
 
 _event_handle: "ctypes.wintypes.HANDLE | None" = None
+_mutex_handle: "ctypes.wintypes.HANDLE | None" = None
 
 
 def acquire_lock() -> bool:
@@ -28,14 +29,14 @@ def acquire_lock() -> bool:
     Returns True if this process holds the lock and should run normally,
     False if another instance already holds it.
     """
-    global _event_handle
+    global _event_handle, _mutex_handle
     if not _IS_WIN:
         return True
 
     kernel32 = ctypes.windll.kernel32  # type: ignore[attr-defined]
     kernel32.CreateMutexW.restype = ctypes.wintypes.HANDLE
     kernel32.SetLastError(0)
-    kernel32.CreateMutexW(None, False, _MUTEX_NAME)
+    _mutex_handle = kernel32.CreateMutexW(None, False, _MUTEX_NAME)
     if ctypes.GetLastError() == _ERROR_ALREADY_EXISTS:  # type: ignore[attr-defined]
         logger.info("Another Grammar AI instance is already running")
         return False
@@ -43,6 +44,22 @@ def acquire_lock() -> bool:
     kernel32.CreateEventW.restype = ctypes.wintypes.HANDLE
     _event_handle = kernel32.CreateEventW(None, False, False, _EVENT_NAME)
     return True
+
+
+def release_lock() -> None:
+    """Release the single-instance mutex ahead of an intentional restart (os.execv).
+
+    Without this, the new process can lose a race against this process's own
+    (delayed) handle cleanup, see the mutex as still held, and exit thinking
+    another instance is running - the app appears to "close but not restart".
+    """
+    global _mutex_handle
+    if not _IS_WIN or _mutex_handle is None:
+        return
+    kernel32 = ctypes.windll.kernel32  # type: ignore[attr-defined]
+    kernel32.ReleaseMutex(_mutex_handle)
+    kernel32.CloseHandle(_mutex_handle)
+    _mutex_handle = None
 
 
 def signal_existing_instance() -> None:
