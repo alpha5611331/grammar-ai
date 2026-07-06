@@ -56,9 +56,13 @@
     --card-bg -> --card / --popover  --accent   -> --primary / --ring
     --border  -> --border / --input  --muted    -> --muted-foreground
     --danger  -> --destructive
-  This app has no manual theme switch, only OS-driven dark mode, so the dark
-  overrides live under @media (prefers-color-scheme: dark) on :root rather than a
-  .dark class. Compact 380px-wide UI: small default radius and 13px base font.
+  Theme resolution (see hooks/useTheme.ts): by default this follows the OS via
+  @media (prefers-color-scheme: dark) below. The titlebar's toggle button can
+  override that explicitly by setting data-theme="light"/"dark" on <html> - the
+  :root[data-theme=...] blocks further down win over the media query either way,
+  and :not([data-theme="light"]) stops the media query from re-applying dark
+  when the user has explicitly forced light while the OS itself prefers dark.
+  Compact 380px-wide UI: small default radius and 13px base font.
 */
 :root {
   --radius: 0.375rem;
@@ -99,7 +103,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --background: #1c1c1e;
     --foreground: #f2f2f2;
     --card: #2a2a2d;
@@ -128,6 +132,38 @@
     --sidebar-border: #3a3a3d;
     --sidebar-ring: #3b82f6;
   }
+}
+
+/* Explicit override from the titlebar's theme toggle (hooks/useTheme.ts) - wins
+   regardless of OS preference, in both directions. */
+:root[data-theme="dark"] {
+  --background: #1c1c1e;
+  --foreground: #f2f2f2;
+  --card: #2a2a2d;
+  --card-foreground: #f2f2f2;
+  --popover: #2a2a2d;
+  --popover-foreground: #f2f2f2;
+  --primary: #2563eb;
+  --primary-foreground: #ffffff;
+  --secondary: #3a3a3d;
+  --secondary-foreground: #f2f2f2;
+  --muted: #333336;
+  --muted-foreground: #9a9a9e;
+  --accent: #3a3a3d;
+  --accent-foreground: #f2f2f2;
+  --destructive: #f87171;
+  --border: #3a3a3d;
+  --input: #3a3a3d;
+  --ring: #3b82f6;
+
+  --sidebar: #2a2a2d;
+  --sidebar-foreground: #f2f2f2;
+  --sidebar-primary: #3b82f6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #3a3a3d;
+  --sidebar-accent-foreground: #f2f2f2;
+  --sidebar-border: #3a3a3d;
+  --sidebar-ring: #3b82f6;
 }
 
 @layer base {
