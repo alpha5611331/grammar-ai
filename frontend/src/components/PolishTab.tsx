@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from "react";
-import { Trash2Icon } from "lucide-react";
+import { Loader2Icon, Trash2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,7 +8,6 @@ import { useBootstrap } from "@/hooks/useBootstrap";
 import { useAlertConfirm } from "@/hooks/useAlertConfirm";
 import { usePolish } from "@/hooks/usePolish";
 import { cn } from "@/lib/utils";
-import { statusColorClass } from "@/lib/status";
 
 export interface PolishTabHandle {
   run: (text: string) => void;
@@ -98,6 +97,7 @@ export const PolishTab = forwardRef<PolishTabHandle, PolishTabProps>(function Po
           </SelectContent>
         </Select>
         <Button type="button" size="sm" variant="outline" disabled={polish.busy} onClick={triggerFromButton}>
+          {polish.busy ? <Loader2Icon className="mr-2 size-3.5 animate-spin" /> : null}
           {boot.strings.POLISH} ({boot.polishHotkey})
         </Button>
         <span className="flex-1" />
@@ -111,10 +111,6 @@ export const PolishTab = forwardRef<PolishTabHandle, PolishTabProps>(function Po
         >
           <Trash2Icon />
         </Button>
-      </div>
-
-      <div className={cn("min-h-3.5 text-[11px]", statusColorClass(polish.status.color))}>
-        {polish.status.text}
       </div>
 
       <div className="mt-1 text-[11px] font-semibold text-muted-foreground">

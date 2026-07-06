@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckIcon, CopyIcon, Trash2Icon } from "lucide-react";
+import { CheckIcon, CopyIcon, Loader2Icon, Trash2Icon } from "lucide-react";
 import { forwardRef, useImperativeHandle } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,7 +8,6 @@ import { useBootstrap } from "@/hooks/useBootstrap";
 import { useAlertConfirm } from "@/hooks/useAlertConfirm";
 import { useTranslate } from "@/hooks/useTranslate";
 import { cn } from "@/lib/utils";
-import { statusColorClass } from "@/lib/status";
 
 export interface TranslateTabHandle {
   run: (text: string) => void;
@@ -67,11 +66,9 @@ export const TranslateTab = forwardRef<TranslateTabHandle, TranslateTabProps>(fu
           disabled={translate.busy}
           onClick={triggerFromButton}
         >
+          {translate.busy ? <Loader2Icon className="mr-2 size-3.5 animate-spin" /> : null}
           {boot.strings.TRANSLATE} ({boot.translateHotkey})
         </Button>
-        <span className={cn("text-[11px]", statusColorClass(translate.status.color))}>
-          {translate.status.text}
-        </span>
         <span className="flex-1" />
         <Button
           type="button"
