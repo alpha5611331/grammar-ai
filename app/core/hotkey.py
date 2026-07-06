@@ -25,7 +25,7 @@ from typing import Callable, Optional
 
 from loguru import logger
 
-from app.core.clipboard import poll_clipboard
+from app.core.clipboard import VK_CONTROL, VK_MENU, poll_clipboard, wait_for_keys_released
 
 _IS_WIN = sys.platform == "win32"
 
@@ -133,6 +133,12 @@ class HotkeyManager:
         if pyautogui is None or pyperclip is None:
             logger.warning("pyautogui/pyperclip not available - hotkey capture unavailable")
             return
+
+        # WM_HOTKEY fires on key-down of the combo's last key, while the user is
+        # very likely still physically holding it - simulating Ctrl+C before that
+        # clears risks it combining with the still-held modifiers (see
+        # wait_for_keys_released's docstring).
+        wait_for_keys_released([VK_CONTROL, VK_MENU, self._vk])
 
         original_clipboard = pyperclip.paste()
         try:

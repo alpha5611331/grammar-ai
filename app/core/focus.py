@@ -16,7 +16,7 @@ import time
 
 from loguru import logger
 
-from app.core.clipboard import poll_clipboard
+from app.core.clipboard import VK_MENU, poll_clipboard, wait_for_keys_released
 
 _IS_WIN = sys.platform == "win32"
 
@@ -73,6 +73,12 @@ def restore_focus_and_paste(hwnd: int, original: str, polished: str) -> bool:
     """
     if not _IS_WIN or not hwnd or pyautogui is None or pyperclip is None:
         return False
+
+    # The in-app Alt+Number "Use" shortcut fires on key-down, while Alt may still be
+    # physically held - simulating Ctrl+A/C/V before that clears risks it combining
+    # into Ctrl+Alt+<key> (see wait_for_keys_released's docstring). A mouse-clicked
+    # "Use" holds no key, so this is a no-op there.
+    wait_for_keys_released([VK_MENU])
 
     bring_to_foreground(hwnd)
     time.sleep(0.05)
