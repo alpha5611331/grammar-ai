@@ -70,13 +70,6 @@ export const PolishTab = forwardRef<PolishTabHandle, PolishTabProps>(function Po
 
   return (
     <div className={cn("flex flex-col gap-2", !active && "hidden")}>
-      <div>
-        <label className="mb-1 block text-[11px] font-semibold text-muted-foreground">
-          {boot.strings.ORIGINAL_TEXT}
-        </label>
-        <Textarea rows={4} value={polish.original} onChange={(e) => polish.setOriginal(e.target.value)} />
-      </div>
-
       <div className="flex items-center gap-1.5">
         <label className="whitespace-nowrap text-xs text-muted-foreground">{boot.strings.TONE_LABEL}</label>
         <Select value={polish.tone} onValueChange={(v) => v !== null && polish.onToneChange(v)}>
@@ -111,6 +104,13 @@ export const PolishTab = forwardRef<PolishTabHandle, PolishTabProps>(function Po
         >
           <Trash2Icon />
         </Button>
+      </div>
+
+      <div>
+        <label className="mb-1 block text-[11px] font-semibold text-muted-foreground">
+          {boot.strings.ORIGINAL_TEXT}
+        </label>
+        <Textarea rows={4} value={polish.original} onChange={(e) => polish.setOriginal(e.target.value)} />
       </div>
 
       <div className="mt-1 text-[11px] font-semibold text-muted-foreground">

@@ -47,17 +47,6 @@ export const TranslateTab = forwardRef<TranslateTabHandle, TranslateTabProps>(fu
 
   return (
     <div className={cn("flex flex-col gap-2", !active && "hidden")}>
-      <div>
-        <label className="mb-1 block text-[11px] font-semibold text-muted-foreground">
-          {boot.strings.ORIGINAL_TEXT}
-        </label>
-        <Textarea
-          rows={5}
-          value={translate.original}
-          onChange={(e) => translate.setOriginal(e.target.value)}
-        />
-      </div>
-
       <div className="flex items-center gap-1.5">
         <Button
           type="button"
@@ -80,6 +69,17 @@ export const TranslateTab = forwardRef<TranslateTabHandle, TranslateTabProps>(fu
         >
           <Trash2Icon />
         </Button>
+      </div>
+
+      <div>
+        <label className="mb-1 block text-[11px] font-semibold text-muted-foreground">
+          {boot.strings.ORIGINAL_TEXT}
+        </label>
+        <Textarea
+          rows={5}
+          value={translate.original}
+          onChange={(e) => translate.setOriginal(e.target.value)}
+        />
       </div>
 
       <div>
