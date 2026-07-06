@@ -198,10 +198,11 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
           <div className={`min-h-3.5 text-sm ${statusColorClass(status.color)}`}>{status.text}</div>
         </div>
 
-        <div className="flex justify-end gap-1.5">
+        <div className="flex gap-1.5">
           <Button type="button" variant="outline" disabled={testing} onClick={onTest}>
             {boot.strings.TEST_CONNECTION}
           </Button>
+          <div className="flex-1" />
           <Button type="button" onClick={onSave}>
             {boot.strings.SAVE}
           </Button>

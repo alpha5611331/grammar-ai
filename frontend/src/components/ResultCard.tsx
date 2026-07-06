@@ -1,5 +1,5 @@
 import { forwardRef, useImperativeHandle, useState } from "react";
-import { CheckIcon, CopyIcon } from "lucide-react";
+import { CheckCheckIcon, CheckIcon, CopyIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { api, type GoalInfo, type PolishResult, type ToneInfo } from "@/lib/pywebview";
@@ -59,14 +59,14 @@ export const ResultCard = forwardRef<ResultCardHandle, ResultCardProps>(function
         <span className="text-sm font-semibold text-muted-foreground">{goalMeta?.label || result.goal}</span>
         <span className="flex-1" />
         {shortcutHint && (
-          <span className="rounded border border-border px-1 text-sm leading-snug text-muted-foreground">
+          <span className="rounded border border-border px-1.5 text-sm leading-snug text-muted-foreground">
             {shortcutHint}
           </span>
         )}
         <Button
           type="button"
           variant="outline"
-          size="icon"
+          size="icon-sm"
           title={boot.strings.USE}
           aria-label={boot.strings.USE}
           onClick={triggerUse}
@@ -76,12 +76,12 @@ export const ResultCard = forwardRef<ResultCardHandle, ResultCardProps>(function
         <Button
           type="button"
           variant="outline"
-          size="icon"
+          size="icon-sm"
           title={justCopied ? boot.strings.COPIED_EXCL : boot.strings.COPY}
           aria-label={boot.strings.COPY}
           onClick={doCopy}
         >
-          {justCopied ? <CheckIcon /> : <CopyIcon />}
+          {justCopied ? <CheckCheckIcon /> : <CopyIcon />}
         </Button>
       </div>
       <Textarea
