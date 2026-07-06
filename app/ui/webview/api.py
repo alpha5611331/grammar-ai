@@ -30,7 +30,7 @@ from app.config import (
 )
 from app.core import single_instance, updater
 from app.core.autorun import configure_autorun
-from app.core.focus import restore_focus_and_paste
+from app.core.focus import bring_to_foreground, restore_focus_and_paste
 from app.core.hotkey import HotkeyManager
 from app.core.llm import check_connection, polish_text, translate_text
 from app.db.database import (
@@ -130,6 +130,10 @@ class Api:
         try:
             self._window.show()
             self._window.restore()
+            # window.show()/restore() alone only un-hide/un-minimize - they don't
+            # reliably grab OS foreground focus when called off the hotkey hook's
+            # worker thread (see bring_to_foreground's docstring for why).
+            bring_to_foreground(self._window.native.Handle.ToInt64())  # type: ignore[attr-defined]
         except Exception as e:
             logger.debug(f"show_window failed: {e}")
 

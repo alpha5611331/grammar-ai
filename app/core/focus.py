@@ -28,6 +28,40 @@ def get_foreground_window() -> int:
     return 0
 
 
+def bring_to_foreground(hwnd: int) -> None:
+    """Force `hwnd` (one of Grammar AI's own windows) to the OS foreground.
+
+    Plain SetForegroundWindow/pywebview's window.show()+restore() aren't enough when
+    called off the back of the global hotkey hook: the hook only observes keystrokes
+    (CallNextHookEx passes every one through, see hotkey.py), it never consumes them,
+    so whatever app the user was actually typing into - not Grammar AI - is the one
+    Windows credits with "the most recent input." Windows denies a foreground-switch
+    request from any process that isn't the current foreground process, wasn't
+    launched by it, or didn't generate the last input event, and flashes the taskbar
+    button instead. AttachThreadInput temporarily shares the calling thread's input
+    state with the foreground thread, which is the standard, documented way to
+    legitimately grant a background process that eligibility for one call.
+    """
+    if not _IS_WIN or not hwnd:
+        return
+    user32 = ctypes.windll.user32
+    fg_hwnd = user32.GetForegroundWindow()
+    if fg_hwnd == hwnd:
+        return
+    fg_thread = user32.GetWindowThreadProcessId(fg_hwnd, None)
+    cur_thread = ctypes.windll.kernel32.GetCurrentThreadId()
+    attached = False
+    try:
+        if fg_thread and fg_thread != cur_thread:
+            attached = bool(user32.AttachThreadInput(cur_thread, fg_thread, True))
+        user32.SetForegroundWindow(hwnd)
+    except Exception as e:
+        logger.debug(f"bring_to_foreground failed: {e}")
+    finally:
+        if attached:
+            user32.AttachThreadInput(cur_thread, fg_thread, False)
+
+
 def _is_control_alive(control: "Optional[auto.Control]") -> bool:
     if control is None:
         return False
