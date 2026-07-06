@@ -11,17 +11,21 @@ export function UpdateBar({ update, onDismiss }: { update: UpdateInfo | null; on
   if (!update) return null;
 
   return (
-    <div className="flex items-center gap-2 border-b border-border bg-amber-100 px-2 py-1 text-xs text-amber-900">
-      <span>{fmt(boot.strings.UPDATE_AVAILABLE, { version: update.version })}</span>
+    <div className="flex items-center gap-2 border-b border-border bg-primary/10 px-2 py-1 text-xs text-foreground">
+      <span className="font-medium">{fmt(boot.strings.UPDATE_AVAILABLE, { version: update.version })}</span>
       <span className="flex-1" />
       <button
         type="button"
-        className="rounded border border-border bg-card px-2 py-1 text-xs"
+        className="rounded border border-primary/30 bg-primary px-2 py-1 text-xs font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
         onClick={() => void api().open_installer_and_quit()}
       >
         {boot.strings.UPDATE_NOW}
       </button>
-      <button type="button" className="rounded px-1.5 py-0.5 text-sm" onClick={onDismiss}>
+      <button
+        type="button"
+        className="rounded px-1.5 py-0.5 text-sm text-foreground/80 transition-colors hover:bg-background/70 hover:text-foreground"
+        onClick={onDismiss}
+      >
         &times;
       </button>
     </div>
