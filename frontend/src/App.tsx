@@ -9,6 +9,7 @@ import { SettingsDialog } from "@/components/SettingsDialog";
 import { ErrorDialog } from "@/components/ErrorDialog";
 import { useBootstrap } from "@/hooks/useBootstrap";
 import { cn } from "@/lib/utils";
+import { Button } from "./components/ui/button";
 
 type TabName = "polish" | "translate" | "history";
 
@@ -60,14 +61,15 @@ export function App() {
           onClick={() => setTab("history")}
         />
         <span className="flex-1" />
-        <button
+        <Button
           type="button"
+          variant="outline"
           title={boot.strings.SETTINGS}
           onClick={() => setSettingsOpen(true)}
-          className="rounded p-1.5 text-foreground hover:bg-border"
+          className="rounded p-1.5 mb-0.5 text-foreground hover:bg-border"
         >
-          <SettingsIcon className="size-3.5" />
-        </button>
+          <SettingsIcon className="size-4" />
+        </Button>
       </nav>
 
       <main className="flex-1 overflow-y-auto p-2">
