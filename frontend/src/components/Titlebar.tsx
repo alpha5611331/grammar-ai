@@ -53,7 +53,7 @@ export function Titlebar({
         title="Close (Esc)"
         aria-label="Close"
         onClick={() => api().close_window()}
-        className="flex h-8 w-8 items-center justify-center rounded text-base text-foreground hover:bg-border"
+        className="flex h-8 w-12 items-center justify-center rounded text-base text-foreground hover:bg-border"
       >
         <XIcon className="size-4" />
       </button>

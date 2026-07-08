@@ -79,6 +79,7 @@ export const TranslateTab = forwardRef<TranslateTabHandle, TranslateTabProps>(fu
           value={translate.original}
           disabled={translate.busy}
           onChange={(e) => translate.setOriginal(e.target.value)}
+          className="max-h-48 overflow-y-auto"
         />
       </div>
 

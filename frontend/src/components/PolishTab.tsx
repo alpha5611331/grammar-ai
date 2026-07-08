@@ -115,6 +115,7 @@ export const PolishTab = forwardRef<PolishTabHandle, PolishTabProps>(function Po
           value={polish.original}
           disabled={polish.busy}
           onChange={(e) => polish.setOriginal(e.target.value)}
+          className="max-h-48 overflow-y-auto"
         />
       </div>
 
