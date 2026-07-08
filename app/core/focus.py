@@ -77,8 +77,12 @@ def restore_focus_and_paste(hwnd: int, original: str, polished: str) -> bool:
     # The in-app Alt+Number "Use" shortcut fires on key-down, while Alt may still be
     # physically held - simulating Ctrl+A/C/V before that clears risks it combining
     # into Ctrl+Alt+<key> (see wait_for_keys_released's docstring). A mouse-clicked
-    # "Use" holds no key, so this is a no-op there.
-    wait_for_keys_released([VK_MENU])
+    # "Use" holds no key, so this is a no-op there. If Alt is still held once the
+    # wait times out, proceeding would risk exactly that corruption, so bail out
+    # to the caller's plain-clipboard-copy fallback instead of pasting.
+    if not wait_for_keys_released([VK_MENU]):
+        logger.warning("Alt still held after timeout - aborting paste-back to avoid corrupting target field")
+        return False
 
     bring_to_foreground(hwnd)
     time.sleep(0.05)

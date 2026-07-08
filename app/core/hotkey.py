@@ -137,8 +137,13 @@ class HotkeyManager:
         # WM_HOTKEY fires on key-down of the combo's last key, while the user is
         # very likely still physically holding it - simulating Ctrl+C before that
         # clears risks it combining with the still-held modifiers (see
-        # wait_for_keys_released's docstring).
-        wait_for_keys_released([VK_CONTROL, VK_MENU, self._vk])
+        # wait_for_keys_released's docstring). If the combo is still held once the
+        # wait times out, abort rather than risk corrupting the source field.
+        if not wait_for_keys_released([VK_CONTROL, VK_MENU, self._vk]):
+            logger.warning(
+                f"Hotkey {self._description} still held after timeout - aborting capture"
+            )
+            return
 
         original_clipboard = pyperclip.paste()
         try:
