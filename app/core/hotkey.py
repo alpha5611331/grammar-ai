@@ -1,6 +1,6 @@
 """Global hotkey via Win32 RegisterHotKey, delivered as WM_HOTKEY on a dedicated thread.
 
-Polish fires on Ctrl+Alt+A, Translate on Ctrl+Alt+D - real key combos, so
+Polish fires on Ctrl+Alt+S, Translate on Ctrl+Alt+D - real key combos, so
 `RegisterHotKey` can register them directly (no need for the low-level keyboard
 hook a "double-tap a lone modifier" scheme would require). Each `HotkeyManager`
 runs its own thread whose only job is to pump `GetMessageW` for its registered
