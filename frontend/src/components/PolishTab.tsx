@@ -71,13 +71,7 @@ export const PolishTab = forwardRef<PolishTabHandle, PolishTabProps>(function Po
   return (
     <div className={cn("flex flex-col gap-2", !active && "hidden")}>
       <div className="flex items-center gap-1.5">
-        <Button
-          type="button"
-          size="sm"
-          className="w-40"
-          disabled={polish.busy}
-          onClick={triggerFromButton}
-        >
+        <Button type="button" size="sm" className="w-40" disabled={polish.busy} onClick={triggerFromButton}>
           {boot.strings.POLISH} ({boot.polishHotkey})
         </Button>
         <span className="flex-1" />
