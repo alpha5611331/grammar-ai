@@ -105,100 +105,106 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
           <DialogTitle>{boot.strings.SETTINGS}</DialogTitle>
         </DialogHeader>
 
-        <div className="flex min-h-0 flex-col gap-2 overflow-y-auto pr-1">
-          <Field label={boot.strings.BASE_URL}>
-            <Input value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)} />
-          </Field>
-          <Field label={boot.strings.MODEL}>
-            <Input value={model} onChange={(e) => setModel(e.target.value)} />
-          </Field>
-          <Field label={boot.strings.API_KEY}>
-            <Input type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)} />
-          </Field>
+        <div className="flex min-h-0 flex-1 flex-col gap-2">
+          <div className="flex-1 min-h-0 overflow-y-auto pr-1">
+            <div className="flex flex-col gap-2">
+              <Field label={boot.strings.BASE_URL}>
+                <Input value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)} />
+              </Field>
+              <Field label={boot.strings.MODEL}>
+                <Input value={model} onChange={(e) => setModel(e.target.value)} />
+              </Field>
+              <Field label={boot.strings.API_KEY}>
+                <Input type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)} />
+              </Field>
 
-          <Field label={boot.strings.POLISH_LANGUAGE}>
-            <LanguageSelect
-              value={outputLanguage}
-              onChange={setOutputLanguage}
-              options={boot.outputLanguages}
-              title={boot.strings.OUTPUT_LANGUAGE_TOOLTIP}
-            />
-          </Field>
-          <Field label={boot.strings.TRANSLATE_LANGUAGE}>
-            <LanguageSelect
-              value={translateLanguage}
-              onChange={setTranslateLanguage}
-              options={boot.outputLanguages}
-            />
-          </Field>
-          <Field label={boot.strings.INTERFACE_LANGUAGE}>
-            <LanguageSelect value={uiLanguage} onChange={setUiLanguage} options={boot.uiLanguages} />
-          </Field>
+              <Field label={boot.strings.POLISH_LANGUAGE}>
+                <LanguageSelect
+                  value={outputLanguage}
+                  onChange={setOutputLanguage}
+                  options={boot.outputLanguages}
+                  title={boot.strings.OUTPUT_LANGUAGE_TOOLTIP}
+                />
+              </Field>
+              <Field label={boot.strings.TRANSLATE_LANGUAGE}>
+                <LanguageSelect
+                  value={translateLanguage}
+                  onChange={setTranslateLanguage}
+                  options={boot.outputLanguages}
+                />
+              </Field>
+              <Field label={boot.strings.INTERFACE_LANGUAGE}>
+                <LanguageSelect value={uiLanguage} onChange={setUiLanguage} options={boot.uiLanguages} />
+              </Field>
 
-          <label className="flex items-center gap-1.5 text-sm">
-            <Checkbox checked={autorun} onCheckedChange={(c) => setAutorun(c === true)} />
-            {boot.strings.RUN_AT_STARTUP}
-          </label>
+              <label className="flex items-center gap-1.5 text-sm">
+                <Checkbox checked={autorun} onCheckedChange={(c) => setAutorun(c === true)} />
+                {boot.strings.RUN_AT_STARTUP}
+              </label>
 
-          <fieldset className="rounded-md border border-border p-2">
-            <legend className="px-1 text-sm font-semibold text-muted-foreground">
-              {boot.strings.GOALS_TO_GENERATE}
-            </legend>
-            <div className="mb-1.5 flex gap-1">
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={() => setGoals(boot.goalPresets.minimum)}
-              >
-                {boot.strings.MINIMUM}
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={() => setGoals(boot.goalPresets.default)}
-              >
-                {boot.strings.DEFAULT}
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={() => setGoals(boot.goalPresets.all)}
-              >
-                {boot.strings.ALL}
-              </Button>
+              <fieldset className="rounded-md border border-border p-2">
+                <legend className="px-1 text-sm font-semibold text-muted-foreground">
+                  {boot.strings.GOALS_TO_GENERATE}
+                </legend>
+                <div className="mb-1.5 flex gap-1">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setGoals(boot.goalPresets.minimum)}
+                  >
+                    {boot.strings.MINIMUM}
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setGoals(boot.goalPresets.default)}
+                  >
+                    {boot.strings.DEFAULT}
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setGoals(boot.goalPresets.all)}
+                  >
+                    {boot.strings.ALL}
+                  </Button>
+                </div>
+                <div className="grid grid-cols-2 gap-1">
+                  {boot.goals.map((g) => (
+                    <label key={g.value} className="flex items-center gap-1 text-sm" title={g.description}>
+                      <Checkbox
+                        checked={goals.includes(g.value)}
+                        onCheckedChange={(c) => toggleGoal(g.value, c === true)}
+                      />
+                      {g.label}
+                    </label>
+                  ))}
+                </div>
+                <p className="mt-1.5 text-sm italic text-muted-foreground">
+                  {boot.strings.MORE_GOALS_DISCLAIMER}
+                </p>
+              </fieldset>
+
+              <Field label={boot.strings.CONTEXT}>
+                <Textarea
+                  rows={3}
+                  value={context}
+                  onChange={(e) => setContext(e.target.value)}
+                  title={boot.strings.CONTEXT_TOOLTIP}
+                />
+              </Field>
             </div>
-            <div className="grid grid-cols-2 gap-1">
-              {boot.goals.map((g) => (
-                <label key={g.value} className="flex items-center gap-1 text-sm" title={g.description}>
-                  <Checkbox
-                    checked={goals.includes(g.value)}
-                    onCheckedChange={(c) => toggleGoal(g.value, c === true)}
-                  />
-                  {g.label}
-                </label>
-              ))}
-            </div>
-            <p className="mt-1.5 text-sm italic text-muted-foreground">
-              {boot.strings.MORE_GOALS_DISCLAIMER}
-            </p>
-          </fieldset>
+          </div>
 
-          <Field label={boot.strings.CONTEXT}>
-            <Textarea
-              rows={3}
-              value={context}
-              onChange={(e) => setContext(e.target.value)}
-              title={boot.strings.CONTEXT_TOOLTIP}
-            />
-          </Field>
-
-          <div className={`min-h-3.5 text-sm ${statusColorClass(status.color)}`}>{status.text}</div>
+          <div className={`min-h-3.5 border-t border-border pt-2 text-sm ${statusColorClass(status.color)}`}>
+            {status.text}
+          </div>
         </div>
 
-        <div className="flex gap-1.5">
+        <div className="flex gap-1.5 pt-2">
           <Button type="button" variant="outline" disabled={testing} onClick={onTest}>
             {boot.strings.TEST_CONNECTION}
           </Button>
